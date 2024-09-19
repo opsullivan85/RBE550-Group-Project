@@ -1,4 +1,5 @@
-FROM robotlocomotion/drake:noble-1.32.0
+# FROM robotlocomotion/drake:noble-1.32.0
+FROM ubuntu:22.04
 
 # Set up build arguments for the username, UID, and GID
 ARG USERNAME=USERNAME
@@ -18,9 +19,6 @@ RUN groupadd --gid $USER_GID $USERNAME && \
     echo "$USERNAME ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME && \
     chmod 0440 /etc/sudoers.d/$USERNAME
 
-# Update and upgrade the system
-RUN apt-get update && apt-get upgrade -y
-
 WORKDIR /home
 
 ENV SHELL /bin/bash
@@ -28,7 +26,8 @@ ENV SHELL /bin/bash
 # Set the default command to bash
 CMD ["/bin/bash"]
 
-RUN apt install -y \
+RUN apt update && \
+    DEBIAN_FRONTEND=noninteractive apt install -y \
     git-all \
     cmake \
     clang \
@@ -39,7 +38,9 @@ RUN apt install -y \
     python3-pip \
     coinor-libipopt-dev 
 
-RUN pip3 install numpy drake --break-system-packages
+RUN pip3 install \
+    numpy==1.26.4 \
+    drake==1.8.0
 
 # IFOPT
 RUN mkdir repos && \
@@ -56,14 +57,12 @@ RUN mkdir repos && \
 RUN cd repos && \
     git clone https://github.com/lcm-proj/lcm.git --depth 1 && \
     cd lcm && \
-    pip3 install -v . --break-system-packages && \
+    pip3 install -v . && \
     mkdir build && \
     cd build && \
     cmake .. && \
     make && \
     make install
-
-# TODO: Almost working, maybe downgrade drake version?
 
 # Quadruped drake
 RUN cd repos && \
