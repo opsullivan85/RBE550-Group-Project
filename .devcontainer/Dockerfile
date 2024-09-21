@@ -1,28 +1,30 @@
-# FROM robotlocomotion/drake:noble-1.32.0
 FROM ubuntu:22.04
 
 WORKDIR /home
 
 ENV SHELL /bin/bash
 
-# Set the default command to bash
 CMD ["/bin/bash"]
 
 RUN apt update && \
     DEBIAN_FRONTEND=noninteractive apt install -y \
-    git-all \
-    cmake \
-    clang \
-    build-essential \
-    libglib2.0-dev \
-    libeigen3-dev \
-    python3-dev \
-    python3-pip \
-    coinor-libipopt-dev 
+    git-all=1:2.34.1-1ubuntu1.11 \
+    cmake=3.22.1-1ubuntu1.22.04.2 \
+    clang=1:14.0-55~exp2 \
+    build-essential=12.9ubuntu3 \
+    libglib2.0-dev=2.72.4-0ubuntu2.3 \
+    libeigen3-dev=3.4.0-2ubuntu2 \
+    python3-dev=3.10.6-1~22.04.1 \
+    python3-pip=22.0.2+dfsg-1ubuntu0.4 \
+    coinor-libipopt-dev=3.11.9-2.2build5
 
+# Numpy 1.26.4 is neededbecause numpy
+# 2.X had breaking changes for quadruped_drake.
+# Drake 1.24.0 is the newest version that works
+# with quadruped_drake
 RUN pip3 install \
     numpy==1.26.4 \
-    drake==1.8.0
+    drake==1.24.0
 
 # IFOPT
 RUN mkdir repos && \
