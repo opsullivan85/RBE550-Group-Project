@@ -154,9 +154,13 @@ builder.Connect(plant.get_state_output_port(), controller.GetInputPort("quad_sta
 # Add loggers
 logger = LogVectorOutput(controller.GetOutputPort("output_metrics"), builder)
 
-# Set up the Visualizer
-DrakeVisualizer().AddToBuilder(builder, scene_graph)
-ConnectContactResultsToDrakeVisualizer(builder, plant, scene_graph)
+# Set up the Meshcat Visualizer
+meshcat = StartMeshcat()
+meshcat_params = MeshcatVisualizerParams()
+meshcat_params.publish_period = dt  # Set the publishing rate
+model_visualizer = MeshcatVisualizer.AddToBuilder(
+    builder, scene_graph, meshcat, meshcat_params
+)
 
 # Compile the diagram: no adding control blocks from here on out
 diagram = builder.Build()
