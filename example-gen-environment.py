@@ -1,5 +1,5 @@
 from pydrake.common import temp_directory
-from pydrake.geometry import SceneGraphConfig, StartMeshcat
+from pydrake.geometry import StartMeshcat
 from pydrake.math import RigidTransform, RollPitchYaw
 from pydrake.multibody.parsing import Parser
 from pydrake.multibody.plant import AddMultibodyPlantSceneGraph
