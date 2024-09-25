@@ -1,3 +1,5 @@
+name: rbe-550
+
 services:
   sim:
     build: .
