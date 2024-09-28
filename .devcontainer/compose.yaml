@@ -1,0 +1,15 @@
+name: rbe-550
+
+services:
+  sim:
+    build: .
+    # forward the Meshcat webserver port for viewing
+    ports:
+      - "7000:7000"
+    # give the container access to the local repository directory
+    volumes:
+      - type: bind
+        source: ".."
+        target: "/home/ws"
+    # give the container a command to keep it up without doing any useful work
+    command: tail -f /dev/null
