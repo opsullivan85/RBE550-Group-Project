@@ -1,0 +1,1616 @@
+<?xml version="1.0" ?>
+    <sdf version="1.4">
+      <world name="simple_world">
+        <model name="weld_models">
+          
+          <link name="ground">
+            <pose>0 0 -0.1 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>10.0 10.0 0.1</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>10.0 10.0 0.1</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_ground_joint" type="fixed">
+            <parent>world</parent>
+            <child>ground</child>
+          </joint>
+    
+          
+          <link name="obstacle_0">
+            <pose>2.75 -3.0 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_0" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_0</child>
+          </joint>
+          
+          <link name="obstacle_1">
+            <pose>4.0 -3.0 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_1" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_1</child>
+          </joint>
+          
+          <link name="obstacle_2">
+            <pose>-0.25 4.25 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_2" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_2</child>
+          </joint>
+          
+          <link name="obstacle_3">
+            <pose>-1.5 -3.25 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_3" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_3</child>
+          </joint>
+          
+          <link name="obstacle_4">
+            <pose>2.25 -2.0 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_4" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_4</child>
+          </joint>
+          
+          <link name="obstacle_5">
+            <pose>2.25 2.0 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_5" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_5</child>
+          </joint>
+          
+          <link name="obstacle_6">
+            <pose>-1.75 4.25 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_6" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_6</child>
+          </joint>
+          
+          <link name="obstacle_7">
+            <pose>1.25 0.0 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_7" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_7</child>
+          </joint>
+          
+          <link name="obstacle_8">
+            <pose>1.5 -2.25 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_8" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_8</child>
+          </joint>
+          
+          <link name="obstacle_9">
+            <pose>-0.5 0.25 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_9" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_9</child>
+          </joint>
+          
+          <link name="obstacle_10">
+            <pose>1.5 4.25 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_10" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_10</child>
+          </joint>
+          
+          <link name="obstacle_11">
+            <pose>4.75 -1.5 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_11" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_11</child>
+          </joint>
+          
+          <link name="obstacle_12">
+            <pose>-2.75 1.75 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_12" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_12</child>
+          </joint>
+          
+          <link name="obstacle_13">
+            <pose>-1.0 0.25 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_13" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_13</child>
+          </joint>
+          
+          <link name="obstacle_14">
+            <pose>3.0 -0.75 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_14" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_14</child>
+          </joint>
+          
+          <link name="obstacle_15">
+            <pose>-1.5 1.5 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_15" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_15</child>
+          </joint>
+          
+          <link name="obstacle_16">
+            <pose>-0.25 -0.5 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_16" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_16</child>
+          </joint>
+          
+          <link name="obstacle_17">
+            <pose>-4.25 -2.0 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_17" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_17</child>
+          </joint>
+          
+          <link name="obstacle_18">
+            <pose>-3.5 4.5 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_18" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_18</child>
+          </joint>
+          
+          <link name="obstacle_19">
+            <pose>-1.75 -2.0 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_19" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_19</child>
+          </joint>
+          
+          <link name="obstacle_20">
+            <pose>1.75 -1.0 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_20" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_20</child>
+          </joint>
+          
+          <link name="obstacle_21">
+            <pose>-2.0 1.5 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_21" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_21</child>
+          </joint>
+          
+          <link name="obstacle_22">
+            <pose>4.5 -3.25 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_22" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_22</child>
+          </joint>
+          
+          <link name="obstacle_23">
+            <pose>0.75 -2.0 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_23" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_23</child>
+          </joint>
+          
+          <link name="obstacle_24">
+            <pose>-1.0 0.75 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_24" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_24</child>
+          </joint>
+          
+          <link name="obstacle_25">
+            <pose>-0.75 -2.25 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_25" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_25</child>
+          </joint>
+          
+          <link name="obstacle_26">
+            <pose>1.0 -1.25 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_26" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_26</child>
+          </joint>
+          
+          <link name="obstacle_27">
+            <pose>4.25 -4.5 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_27" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_27</child>
+          </joint>
+          
+          <link name="obstacle_28">
+            <pose>-4.0 4.0 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_28" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_28</child>
+          </joint>
+          
+          <link name="obstacle_29">
+            <pose>-1.25 3.75 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_29" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_29</child>
+          </joint>
+          
+          <link name="obstacle_30">
+            <pose>1.0 1.5 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_30" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_30</child>
+          </joint>
+          
+          <link name="obstacle_31">
+            <pose>-2.0 0.75 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_31" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_31</child>
+          </joint>
+          
+          <link name="obstacle_32">
+            <pose>-0.75 -1.25 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_32" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_32</child>
+          </joint>
+          
+          <link name="obstacle_33">
+            <pose>-2.75 -0.75 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_33" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_33</child>
+          </joint>
+          
+          <link name="obstacle_34">
+            <pose>2.75 -1.75 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_34" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_34</child>
+          </joint>
+          
+          <link name="obstacle_35">
+            <pose>-0.25 -1.75 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_35" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_35</child>
+          </joint>
+          
+          <link name="obstacle_36">
+            <pose>3.25 2.25 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_36" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_36</child>
+          </joint>
+          
+          <link name="obstacle_37">
+            <pose>-3.5 2.25 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_37" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_37</child>
+          </joint>
+          
+          <link name="obstacle_38">
+            <pose>-0.25 -2.5 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_38" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_38</child>
+          </joint>
+          
+          <link name="obstacle_39">
+            <pose>-1.75 2.0 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_39" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_39</child>
+          </joint>
+          
+          <link name="obstacle_40">
+            <pose>-4.0 -4.75 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_40" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_40</child>
+          </joint>
+          
+          <link name="obstacle_41">
+            <pose>-3.75 -3.5 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_41" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_41</child>
+          </joint>
+          
+          <link name="obstacle_42">
+            <pose>4.0 4.5 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_42" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_42</child>
+          </joint>
+          
+          <link name="obstacle_43">
+            <pose>4.75 -4.75 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_43" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_43</child>
+          </joint>
+          
+          <link name="obstacle_44">
+            <pose>2.5 4.5 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_44" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_44</child>
+          </joint>
+          
+          <link name="obstacle_45">
+            <pose>-1.5 -0.5 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_45" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_45</child>
+          </joint>
+          
+          <link name="obstacle_46">
+            <pose>-3.5 1.75 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_46" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_46</child>
+          </joint>
+          
+          <link name="obstacle_47">
+            <pose>-3.25 -1.75 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_47" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_47</child>
+          </joint>
+          
+          <link name="obstacle_48">
+            <pose>-2.25 2.0 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_48" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_48</child>
+          </joint>
+          
+          <link name="obstacle_49">
+            <pose>1.0 -4.5 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_49" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_49</child>
+          </joint>
+          
+          <link name="obstacle_50">
+            <pose>0.25 1.5 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_50" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_50</child>
+          </joint>
+          
+          <link name="obstacle_51">
+            <pose>0.75 -2.75 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_51" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_51</child>
+          </joint>
+          
+          <link name="obstacle_52">
+            <pose>-0.5 1.75 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_52" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_52</child>
+          </joint>
+          
+          <link name="obstacle_53">
+            <pose>3.5 1.0 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_53" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_53</child>
+          </joint>
+          
+          <link name="obstacle_54">
+            <pose>-2.25 -4.0 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_54" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_54</child>
+          </joint>
+          
+          <link name="obstacle_55">
+            <pose>2.25 -1.25 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_55" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_55</child>
+          </joint>
+          
+          <link name="obstacle_56">
+            <pose>2.75 -2.25 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_56" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_56</child>
+          </joint>
+          
+          <link name="obstacle_57">
+            <pose>1.5 3.75 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_57" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_57</child>
+          </joint>
+          
+          <link name="obstacle_58">
+            <pose>-1.0 4.75 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_58" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_58</child>
+          </joint>
+          
+          <link name="obstacle_59">
+            <pose>4.5 1.0 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_59" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_59</child>
+          </joint>
+          
+          <link name="obstacle_60">
+            <pose>4.75 4.25 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_60" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_60</child>
+          </joint>
+          
+          <link name="obstacle_61">
+            <pose>1.75 -1.5 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_61" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_61</child>
+          </joint>
+          
+          <link name="obstacle_62">
+            <pose>-4.75 3.5 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_62" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_62</child>
+          </joint>
+          
+          <link name="obstacle_63">
+            <pose>4.75 -0.75 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_63" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_63</child>
+          </joint>
+          
+          <link name="obstacle_64">
+            <pose>-4.5 -0.25 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_64" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_64</child>
+          </joint>
+          
+          <link name="obstacle_65">
+            <pose>-3.0 -4.0 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_65" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_65</child>
+          </joint>
+          
+          <link name="obstacle_66">
+            <pose>-3.0 -2.5 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_66" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_66</child>
+          </joint>
+          
+          <link name="obstacle_67">
+            <pose>0.0 2.25 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_67" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_67</child>
+          </joint>
+          
+          <link name="obstacle_68">
+            <pose>0.0 3.0 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_68" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_68</child>
+          </joint>
+          
+          <link name="obstacle_69">
+            <pose>3.75 -4.25 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_69" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_69</child>
+          </joint>
+          
+          <link name="obstacle_70">
+            <pose>3.25 4.75 0.075 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.15</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_70" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_70</child>
+          </joint>
+          
+          <link name="obstacle_71">
+            <pose>-3.5 3.25 1.0 0 0 0</pose>
+            <collision name="collision1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="visual1">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 2.0</size>
+                </box>
+              </geometry>
+            </visual>
+          </link>
+          <joint name="fixed_joint_obstacle_71" type="fixed">
+            <parent>world</parent>
+            <child>obstacle_71</child>
+          </joint>
+          
+        </model>
+      </world>
+    </sdf>
+    

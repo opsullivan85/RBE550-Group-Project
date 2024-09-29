@@ -126,6 +126,7 @@ class Grid:
 def randInsertObstacle(grid):
     """Randomly choose an obstacle and location to place it in the provided grid. 
     """
+    rand.seed()
     obstacle_options = [Step(), Column()]
     # randomly choose an obstacle
     ob = copy.deepcopy(rand.choice(obstacle_options))

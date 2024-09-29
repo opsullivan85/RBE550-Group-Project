@@ -23,7 +23,7 @@ control_method = "ID"  # ID = Inverse Dynamics (standard QP),
 
 sim_time = 6.0
 dt = 5e-3
-target_realtime_rate = 1.0
+target_realtime_rate = 0.2
 
 show_diagram = False
 make_plots = False
@@ -46,6 +46,7 @@ scene_graph = builder.AddSystem(SceneGraph())
 plant = builder.AddSystem(MultibodyPlant(time_step=dt))
 plant.RegisterAsSourceForSceneGraph(scene_graph)
 quad = Parser(plant=plant).AddModelFromFile(robot_urdf, "quad")
+world = Parser(plant, scene_graph, "world").AddModels("src/savedworlds/testworld1.sdf")
 
 # read in world_sdf file
 with open(str(Path(__file__).parent.joinpath("world.sdf")), "r") as world_file:
@@ -169,7 +170,7 @@ meshcat_params.publish_period = dt  # Set the publishing rate
 
 # Create the visualizer object without passing scene_graph
 visualizer = ModelVisualizer(meshcat=meshcat)
-visualizer.parser().AddModels(file_contents=world_sdf, file_type="sdf")
+#visualizer.parser().AddModels(file_contents=world_sdf, file_type="sdf")
 
 # Add the visualizer to the builder
 model_visualizer = MeshcatVisualizer.AddToBuilder(
@@ -226,11 +227,9 @@ qd0 = np.zeros(plant.num_velocities())
 plant.SetPositions(plant_context, q0)
 plant.SetVelocities(plant_context, qd0)
 
-visualizer.Run()
+#visualizer.Run()
 # Run the simulation!
 simulator.AdvanceTo(sim_time)
-
-
 
 if make_plots:
     import matplotlib.pyplot as plt

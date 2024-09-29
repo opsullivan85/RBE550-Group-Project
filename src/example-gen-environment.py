@@ -14,8 +14,8 @@ from pathlib import Path
 import obstacles as ob
 
 # create the grid, fill it with obstacles, and convert to SDF
-grid = ob.Grid(size_x=10.0, size_y=10.0, res_m_p_cell=0.5)
-ob.fillObstacles(grid, density=0.2)
+grid = ob.Grid(size_x=10.0, size_y=10.0, res_m_p_cell=0.25)
+ob.fillObstacles(grid, density=0.18)
 world_sdf = ob.gridToSdf(grid)
 
 with open(str(Path(__file__).parent.joinpath("world.sdf")), "w") as file:
