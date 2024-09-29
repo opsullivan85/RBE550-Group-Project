@@ -52,13 +52,13 @@ RUN cd repos && \
     make && \
     make install
 
-# Quadruped drake
-RUN cd repos && \
-    git clone https://github.com/vincekurtz/quadruped_drake.git && \
-    cd quadruped_drake && \
-    git checkout 2b0ba84 && \
-    rm -r .git && \
-    mkdir -p build && \
-    cd build && \
-    cmake .. && \
-    make
+# # Quadruped drake
+# RUN cd repos && \
+#     git clone https://github.com/vincekurtz/quadruped_drake.git && \
+#     cd quadruped_drake && \
+#     git checkout 2b0ba84 && \
+#     rm -r .git && \
+#     mkdir -p build && \
+#     cd build && \
+#     cmake .. && \
+#     make

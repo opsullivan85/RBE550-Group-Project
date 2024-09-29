@@ -2,3 +2,4 @@ devcontainer.json
 .vscode
 *~
 __pycache__
+world.sdf
