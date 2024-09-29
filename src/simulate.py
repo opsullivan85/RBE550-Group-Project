@@ -157,10 +157,20 @@ builder.Connect(plant.get_state_output_port(), controller.GetInputPort("quad_sta
 # Add loggers
 logger = LogVectorOutput(controller.GetOutputPort("output_metrics"), builder)
 
+# read in world_sdf file
+with open(str(Path(__file__).parent.joinpath("world.sdf")), "r") as world_file:
+    world_sdf = world_file.read()
+
 # Set up the Meshcat Visualizer
 meshcat = StartMeshcat()
 meshcat_params = MeshcatVisualizerParams()
 meshcat_params.publish_period = dt  # Set the publishing rate
+
+# Create the visualizer object without passing scene_graph
+visualizer = ModelVisualizer(meshcat=meshcat)
+visualizer.parser().AddModels(file_contents=world_sdf, file_type="sdf")
+
+# Add the visualizer to the builder
 model_visualizer = MeshcatVisualizer.AddToBuilder(
     builder, scene_graph, meshcat, meshcat_params
 )
@@ -218,7 +228,11 @@ plant.SetVelocities(plant_context, qd0)
 # Run the simulation!
 simulator.AdvanceTo(sim_time)
 
+visualizer.Run()
+
 if make_plots:
+    import matplotlib.pyplot as plt
+
     log = logger.FindLog(diagram_context)
 
     # Plot stuff
