@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
 from pydrake.all import *
-from quadruped_drake import quadruped_drake_path
+import quadruped_drake
 from quadruped_drake.controllers import *
 from quadruped_drake.planners import BasicTrunkPlanner, TowrTrunkPlanner
 import os
 import sys
+from pathlib import Path
+
+quadruped_drake_path = str(Path(quadruped_drake.__file__).parent)
 
 ############### Common Parameters ###################
 show_trunk_model = True
