@@ -17,6 +17,9 @@ grid = ob.Grid(size_x=10.0, size_y=10.0, res_m_p_cell=0.5)
 ob.fillObstacles(grid, density=0.4)
 world_sdf = ob.gridToSdf(grid)
 
+with open("./world.sdf", "w") as file:
+    file.write(world_sdf)
+
 meshcat = StartMeshcat()
 
 # create a model visualizer and add the world sdf

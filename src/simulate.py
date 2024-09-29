@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 from pydrake.all import *
-from qd import quadruped_drake_path
-from qd.controllers import *
-from qd.planners import BasicTrunkPlanner, TowrTrunkPlanner
+from quadruped_drake import quadruped_drake_path
+from quadruped_drake.controllers import *
+from quadruped_drake.planners import BasicTrunkPlanner, TowrTrunkPlanner
 import os
 import sys
 
