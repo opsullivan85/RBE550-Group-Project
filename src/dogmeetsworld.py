@@ -47,8 +47,13 @@ plant = builder.AddSystem(MultibodyPlant(time_step=dt))
 plant.RegisterAsSourceForSceneGraph(scene_graph)
 quad = Parser(plant=plant).AddModelFromFile(robot_urdf, "quad")
 
+# read in world_sdf file
+with open(str(Path(__file__).parent.joinpath("world.sdf")), "r") as world_file:
+    world_sdf = world_file.read()
+
 # Add a flat ground with friction
 X_BG = RigidTransform()
+X_BG.set_translation(np.array([0.0, 0.0, -0.01]))   #Offset halfspace ground for now
 surface_friction = CoulombFriction(static_friction=1.0, dynamic_friction=1.0)
 plant.RegisterCollisionGeometry(
     plant.world_body(),  # the body for which this object is registered
@@ -157,10 +162,6 @@ builder.Connect(plant.get_state_output_port(), controller.GetInputPort("quad_sta
 # Add loggers
 logger = LogVectorOutput(controller.GetOutputPort("output_metrics"), builder)
 
-# read in world_sdf file
-with open(str(Path(__file__).parent.joinpath("world.sdf")), "r") as world_file:
-    world_sdf = world_file.read()
-
 # Set up the Meshcat Visualizer
 meshcat = StartMeshcat()
 meshcat_params = MeshcatVisualizerParams()
@@ -225,10 +226,11 @@ qd0 = np.zeros(plant.num_velocities())
 plant.SetPositions(plant_context, q0)
 plant.SetVelocities(plant_context, qd0)
 
+visualizer.Run()
 # Run the simulation!
 simulator.AdvanceTo(sim_time)
 
-visualizer.Run()
+
 
 if make_plots:
     import matplotlib.pyplot as plt
