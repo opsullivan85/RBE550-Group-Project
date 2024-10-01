@@ -73,9 +73,10 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
                     .joinpath("trunk_mpc")
                 ),
                 "walk",
-                "0",
+                "1",
                 "1.5",
                 "0.0",
+                "/home/ws/src/savedworlds/testworld1.sdf",
             ],
             env=my_env,
         )

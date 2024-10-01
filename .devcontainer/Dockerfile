@@ -16,7 +16,8 @@ RUN apt update && \
     libeigen3-dev=3.4.0-2ubuntu2 \
     python3-dev=3.10.6-1~22.04.1 \
     python3-pip=22.0.2+dfsg-1ubuntu0.4 \
-    coinor-libipopt-dev=3.11.9-2.2build5
+    coinor-libipopt-dev=3.11.9-2.2build5 \
+    wget
 
 # Numpy 1.26.4 is neededbecause numpy
 # 2.X had breaking changes for quadruped_drake.
@@ -62,3 +63,12 @@ RUN cd repos && \
 #     cd build && \
 #     cmake .. && \
 #     make
+
+RUN cd repos && \
+    apt-get install -y --no-install-recommends ca-certificates gnupg lsb-release wget && \
+    wget -qO- https://drake-apt.csail.mit.edu/drake.asc | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/drake.gpg >/dev/null && \
+    echo "deb [arch=amd64] https://drake-apt.csail.mit.edu/$(lsb_release -cs) $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/drake.list >/dev/null && \
+    apt update && \
+    apt install -y --no-install-recommends drake-dev && \
+    export PATH="/opt/drake/bin${PATH:+:${PATH}}" && \
+    export PYTHONPATH="/opt/drake/lib/python$(python3 -c 'import sys; print("{0}.{1}".format(*sys.version_info))')/site-packages${PYTHONPATH:+:${PYTHONPATH}}"

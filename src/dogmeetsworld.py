@@ -46,15 +46,17 @@ scene_graph = builder.AddSystem(SceneGraph())
 plant = builder.AddSystem(MultibodyPlant(time_step=dt))
 plant.RegisterAsSourceForSceneGraph(scene_graph)
 quad = Parser(plant=plant).AddModelFromFile(robot_urdf, "quad")
-world = Parser(plant, scene_graph, "world").AddModels("src/savedworlds/testworld1.sdf")
+world = Parser(plant, scene_graph, "world").AddModels(
+    "/home/ws/src/savedworlds/testworld1.sdf"
+)
 
 # read in world_sdf file
-with open(str(Path(__file__).parent.joinpath("world.sdf")), "r") as world_file:
-    world_sdf = world_file.read()
+# with open(str(Path(__file__).parent.joinpath("world.sdf")), "r") as world_file:
+#     world_sdf = world_file.read()
 
 # Add a flat ground with friction
 X_BG = RigidTransform()
-X_BG.set_translation(np.array([0.0, 0.0, -0.01]))   #Offset halfspace ground for now
+X_BG.set_translation(np.array([0.0, 0.0, -0.01]))  # Offset halfspace ground for now
 surface_friction = CoulombFriction(static_friction=1.0, dynamic_friction=1.0)
 plant.RegisterCollisionGeometry(
     plant.world_body(),  # the body for which this object is registered
@@ -170,7 +172,7 @@ meshcat_params.publish_period = dt  # Set the publishing rate
 
 # Create the visualizer object without passing scene_graph
 visualizer = ModelVisualizer(meshcat=meshcat)
-#visualizer.parser().AddModels(file_contents=world_sdf, file_type="sdf")
+# visualizer.parser().AddModels(file_contents=world_sdf, file_type="sdf")
 
 # Add the visualizer to the builder
 model_visualizer = MeshcatVisualizer.AddToBuilder(
@@ -227,7 +229,7 @@ qd0 = np.zeros(plant.num_velocities())
 plant.SetPositions(plant_context, q0)
 plant.SetVelocities(plant_context, qd0)
 
-#visualizer.Run()
+# visualizer.Run()
 # Run the simulation!
 simulator.AdvanceTo(sim_time)
 
