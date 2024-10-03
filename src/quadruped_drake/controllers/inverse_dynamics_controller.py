@@ -1,27 +1,27 @@
 from controllers.basic_controller import *
 
+
 class IDController(BasicController):
     """
-    A standard QP-based inverse dynamics controller. 
+    A standard QP-based inverse dynamics controller.
 
-    Takes as input desired positions/velocities/accelerations of the 
-    feet and floating base and computes corresponding joint torques. 
+    Takes as input desired positions/velocities/accelerations of the
+    feet and floating base and computes corresponding joint torques.
     """
+
     def __init__(self, plant, dt, use_lcm=False):
         BasicController.__init__(self, plant, dt, use_lcm=use_lcm)
 
         # inputs from the trunk model are sent in a dictionary
-        self.DeclareAbstractInputPort(
-                "trunk_input",
-                AbstractValue.Make({}))  
-        
+        self.DeclareAbstractInputPort("trunk_input", AbstractValue.Make({}))
+
         # Set the friction coefficient
         self.mu = 0.7
 
         # Choose a solver
-        #self.solver = GurobiSolver()
+        # self.solver = GurobiSolver()
         self.solver = OsqpSolver()
-    
+
     def AddJacobianTypeCost(self, J, qdd, Jd_qd, xdd_des, weight=1.0):
         """
         Add a quadratic cost of the form
@@ -29,10 +29,10 @@ class IDController(BasicController):
         to the whole-body controller QP.
         """
         # Put in the form 1/2*qdd'*Q*qdd + c'*qdd for fast formulation
-        Q = weight*np.dot(J.T,J)
-        c = weight*(np.dot(Jd_qd.T,J) - np.dot(xdd_des.T,J)).T
+        Q = weight * np.dot(J.T, J)
+        c = weight * (np.dot(Jd_qd.T, J) - np.dot(xdd_des.T, J)).T
 
-        return self.mp.AddQuadraticCost(Q,c,qdd, is_convex=True)
+        return self.mp.AddQuadraticCost(Q, c, qdd, is_convex=True)
 
     def AddJacobianTypeConstraint(self, J, qdd, Jd_qd, xdd_des):
         """
@@ -40,8 +40,8 @@ class IDController(BasicController):
             J*qdd + Jd_qd == xdd_des
         to the whole-body controller QP.
         """
-        A_eq = J     # A_eq*qdd == b_eq
-        b_eq = xdd_des-Jd_qd
+        A_eq = J  # A_eq*qdd == b_eq
+        b_eq = xdd_des - Jd_qd
 
         return self.mp.AddLinearEqualityConstraint(A_eq, b_eq, qdd)
 
@@ -53,15 +53,15 @@ class IDController(BasicController):
         """
         # We'll rewrite the constraints in the form A_eq*x == b_eq for speed
         A_eq = np.hstack([M, -S.T])
-        x = np.vstack([qdd,tau])
+        x = np.vstack([qdd, tau])
 
         for j in range(len(J_c)):
             A_eq = np.hstack([A_eq, -J_c[j].T])
-            x = np.vstack([x,f_c[j]])
+            x = np.vstack([x, f_c[j]])
 
-        b_eq = -C-tau_g
+        b_eq = -C - tau_g
 
-        return self.mp.AddLinearEqualityConstraint(A_eq,b_eq,x)
+        return self.mp.AddLinearEqualityConstraint(A_eq, b_eq, x)
 
     def AddFrictionPyramidConstraint(self, f_c):
         """
@@ -70,20 +70,24 @@ class IDController(BasicController):
         """
         num_contacts = len(f_c)
 
-        A_i = np.asarray([[ 1, 0, -self.mu],   # pyramid approximation of CWC for one
-                          [-1, 0, -self.mu],   # contact force f \in R^3
-                          [ 0, 1, -self.mu],
-                          [ 0,-1, -self.mu]])
+        A_i = np.asarray(
+            [
+                [1, 0, -self.mu],  # pyramid approximation of CWC for one
+                [-1, 0, -self.mu],  # contact force f \in R^3
+                [0, 1, -self.mu],
+                [0, -1, -self.mu],
+            ]
+        )
 
         # We'll formulate as lb <= Ax <= ub, where x=[f_1',f_2',...]'
-        A = np.kron(np.eye(num_contacts),A_i)
+        A = np.kron(np.eye(num_contacts), A_i)
 
-        ub = np.zeros((4*num_contacts,1))
-        lb = -np.inf*np.ones((4*num_contacts,1))
+        ub = np.zeros((4 * num_contacts, 1))
+        lb = -np.inf * np.ones((4 * num_contacts, 1))
 
         x = np.vstack([f_c[j] for j in range(num_contacts)])
 
-        return self.mp.AddLinearConstraint(A=A,lb=lb,ub=ub,vars=x)
+        return self.mp.AddLinearConstraint(A=A, lb=lb, ub=ub, vars=x)
 
     def AddContactConstraint(self, J_c, vd, Jdv_c, v):
         """
@@ -91,12 +95,12 @@ class IDController(BasicController):
 
             J_c[j]*vd + Jdv_c[j] == -Kd*J_c[j]*v
         """
-        Kd = 100*np.eye(3)
+        Kd = 100 * np.eye(3)
 
         num_contacts = len(J_c)
         for j in range(num_contacts):
-            pd = (J_c[j]@v).reshape(3,1)
-            pdd_des = -Kd@pd
+            pd = (J_c[j] @ v).reshape(3, 1)
+            pdd_des = -Kd @ pd
 
             constraint = self.AddJacobianTypeConstraint(J_c[j], vd, Jdv_c[j], pdd_des)
 
@@ -131,11 +135,15 @@ class IDController(BasicController):
         M, Cv, tau_g, S = self.CalcDynamics()
 
         # Get setpoint data from the trunk model
-        trunk_data = self.EvalAbstractInput(context,1).get_value()
-        
-        contact_feet = trunk_data["contact_states"]       # Note: it may be better to determine
-        swing_feet = [not foot for foot in contact_feet]  # contact states from the actual robot rather than
-        num_contact = sum(contact_feet)                   # the planned trunk trajectory.
+        trunk_data = self.EvalAbstractInput(context, 1).get_value()
+
+        contact_feet = trunk_data[
+            "contact_states"
+        ]  # Note: it may be better to determine
+        swing_feet = [
+            not foot for foot in contact_feet
+        ]  # contact states from the actual robot rather than
+        num_contact = sum(contact_feet)  # the planned trunk trajectory.
         num_swing = sum(swing_feet)
 
         p_body_nom = trunk_data["p_body"]
@@ -145,10 +153,31 @@ class IDController(BasicController):
         rpy_body_nom = trunk_data["rpy_body"]
         rpyd_body_nom = trunk_data["rpyd_body"]
         rpydd_body_nom = trunk_data["rpydd_body"]
-        
-        p_feet_nom = np.array([trunk_data["p_lf"],trunk_data["p_rf"],trunk_data["p_lh"],trunk_data["p_rh"]])
-        pd_feet_nom = np.array([trunk_data["pd_lf"],trunk_data["pd_rf"],trunk_data["pd_lh"],trunk_data["pd_rh"]])
-        pdd_feet_nom = np.array([trunk_data["pdd_lf"],trunk_data["pdd_rf"],trunk_data["pdd_lh"],trunk_data["pdd_rh"]])
+
+        p_feet_nom = np.array(
+            [
+                trunk_data["p_lf"],
+                trunk_data["p_rf"],
+                trunk_data["p_lh"],
+                trunk_data["p_rh"],
+            ]
+        )
+        pd_feet_nom = np.array(
+            [
+                trunk_data["pd_lf"],
+                trunk_data["pd_rf"],
+                trunk_data["pd_lh"],
+                trunk_data["pd_rh"],
+            ]
+        )
+        pdd_feet_nom = np.array(
+            [
+                trunk_data["pdd_lf"],
+                trunk_data["pdd_rf"],
+                trunk_data["pdd_lh"],
+                trunk_data["pdd_rh"],
+            ]
+        )
 
         p_s_nom = p_feet_nom[swing_feet]
         pd_s_nom = pd_feet_nom[swing_feet]
@@ -158,11 +187,13 @@ class IDController(BasicController):
         X_body, J_body, Jdv_body = self.CalcFramePoseQuantities(self.body_frame)
 
         p_body = X_body.translation()
-        pd_body = (J_body@v)[3:]
+        pd_body = (J_body @ v)[3:]
 
-        RPY_body = RollPitchYaw(X_body.rotation())  # RPY object helps convert between angular velocity and rpyd
+        RPY_body = RollPitchYaw(
+            X_body.rotation()
+        )  # RPY object helps convert between angular velocity and rpyd
         rpy_body = RPY_body.vector()
-        omega_body = (J_body@v)[:3]   # angular velocity of the body
+        omega_body = (J_body @ v)[:3]  # angular velocity of the body
         rpyd_body = RPY_body.CalcRpyDtFromAngularVelocityInParent(omega_body)
 
         p_lf, J_lf, Jdv_lf = self.CalcFramePositionQuantities(self.lf_foot_frame)
@@ -170,10 +201,10 @@ class IDController(BasicController):
         p_lh, J_lh, Jdv_lh = self.CalcFramePositionQuantities(self.lh_foot_frame)
         p_rh, J_rh, Jdv_rh = self.CalcFramePositionQuantities(self.rh_foot_frame)
 
-        p_feet = np.array([p_lf, p_rf, p_lh, p_rh]).reshape(4,3)
+        p_feet = np.array([p_lf, p_rf, p_lh, p_rh]).reshape(4, 3)
         J_feet = np.array([J_lf, J_rf, J_lh, J_rh])
         Jdv_feet = np.array([Jdv_lf, Jdv_rf, Jdv_lh, Jdv_rh])
-        pd_feet = J_feet@v
+        pd_feet = J_feet @ v
 
         p_s = p_feet[swing_feet]
         pd_s = pd_feet[swing_feet]
@@ -184,24 +215,33 @@ class IDController(BasicController):
         Jdv_s = Jdv_feet[swing_feet]
 
         # Set desired task-space accelerations
-        pdd_body_des = pdd_body_nom - Kp_body_p*(p_body - p_body_nom) \
-                                    - Kd_body_p*(pd_body - pd_body_nom)
+        pdd_body_des = (
+            pdd_body_nom
+            - Kp_body_p * (p_body - p_body_nom)
+            - Kd_body_p * (pd_body - pd_body_nom)
+        )
 
-        rpydd_body_des = rpydd_body_nom - Kp_body_rpy*(rpy_body - rpy_body_nom) \
-                                        - Kd_body_rpy*(rpyd_body - rpyd_body_nom)
+        rpydd_body_des = (
+            rpydd_body_nom
+            - Kp_body_rpy * (rpy_body - rpy_body_nom)
+            - Kd_body_rpy * (rpyd_body - rpyd_body_nom)
+        )
         omegad_body_des = RPY_body.CalcAngularVelocityInParentFromRpyDt(rpydd_body_des)
-        
-        vd_body_des = np.hstack([omegad_body_des,pdd_body_des])   # desired spatial acceleration of the body
 
-        pdd_s_des = pdd_s_nom  - Kp_foot*(p_s - p_s_nom) \
-                               - Kd_foot*(pd_s - pd_s_nom)
+        vd_body_des = np.hstack(
+            [omegad_body_des, pdd_body_des]
+        )  # desired spatial acceleration of the body
+
+        pdd_s_des = pdd_s_nom - Kp_foot * (p_s - p_s_nom) - Kd_foot * (pd_s - pd_s_nom)
 
         # Set up the QP
         self.mp = MathematicalProgram()
-        
-        vd = self.mp.NewContinuousVariables(self.plant.num_velocities(), 1, 'vd')
-        tau = self.mp.NewContinuousVariables(self.plant.num_actuators(), 1, 'tau')
-        f_c = [self.mp.NewContinuousVariables(3,1,'f_%s'%j) for j in range(num_contact)]
+
+        vd = self.mp.NewContinuousVariables(self.plant.num_velocities(), 1, "vd")
+        tau = self.mp.NewContinuousVariables(self.plant.num_actuators(), 1, "tau")
+        f_c = [
+            self.mp.NewContinuousVariables(3, 1, "f_%s" % j) for j in range(num_contact)
+        ]
 
         # min || J_body*vd + Jd_body*v - pdd_body_des ||^2
         self.AddJacobianTypeCost(J_body, vd, Jdv_body, vd_body_des, weight=w_body)
@@ -225,10 +265,14 @@ class IDController(BasicController):
         tau = result.GetSolution(tau)
 
         # Set error for logging
-        x_tilde = np.hstack([rpy_body - rpy_body_nom,
-                             p_body - p_body_nom,
-                             p_s.flatten() - p_s_nom.flatten()])
-        self.err = x_tilde.T@x_tilde
+        x_tilde = np.hstack(
+            [
+                rpy_body - rpy_body_nom,
+                p_body - p_body_nom,
+                p_s.flatten() - p_s_nom.flatten(),
+            ]
+        )
+        self.err = x_tilde.T @ x_tilde
         self.res = result.get_solver_details().primal_res
-    
+
         return tau
