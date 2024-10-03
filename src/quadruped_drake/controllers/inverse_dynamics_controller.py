@@ -261,9 +261,22 @@ class IDController(BasicController):
             self.AddContactConstraint(J_c, vd, Jdv_c, v)
 
         result = self.solver.Solve(self.mp)
-        assert result.is_success()
-        tau = result.GetSolution(tau)
-
+        # assert result.is_success()
+        if result.is_success():
+            tau = result.GetSolution(tau)
+            #Brick-wall saturation for torque limits of MIT Minicheetah actuators
+            for i in range(12):
+                if tau[i] > 17:
+                    tau[i] = 17
+                elif tau[i] < -17:
+                    tau[i] = -17
+        else:
+            # The dog has failed and thus we Old Yeller it
+            tau = np.zeros(12)        
+        
+        # Switch the dog off - this bypasses the entire ID controller if uncommented
+        # tau = np.zeros(12)
+        
         # Set error for logging
         x_tilde = np.hstack(
             [

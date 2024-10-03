@@ -22,8 +22,8 @@ control_method = "ID"  # ID = Inverse Dynamics (standard QP),
 # CLF = control-lyapunov-function based
 
 sim_time = 6.0
-dt = 5e-3
-target_realtime_rate = 0.2
+dt = 1e-3
+target_realtime_rate = 0.5
 
 show_diagram = False
 make_plots = False
@@ -57,7 +57,7 @@ world = Parser(plant, scene_graph, "world").AddModels(
 # Add a flat ground with friction
 X_BG = RigidTransform()
 X_BG.set_translation(np.array([0.0, 0.0, -0.01]))  # Offset halfspace ground for now
-surface_friction = CoulombFriction(static_friction=1.0, dynamic_friction=1.0)
+surface_friction = CoulombFriction(static_friction=0.7, dynamic_friction=0.7)
 plant.RegisterCollisionGeometry(
     plant.world_body(),  # the body for which this object is registered
     X_BG,  # The fixed pose of the geometry frame G in the body frame B
