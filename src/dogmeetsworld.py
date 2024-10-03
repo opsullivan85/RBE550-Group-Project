@@ -23,7 +23,7 @@ control_method = "ID"  # ID = Inverse Dynamics (standard QP),
 
 sim_time = 6.0
 dt = 1e-3
-target_realtime_rate = 0.5
+target_realtime_rate = 1.0
 
 show_diagram = False
 make_plots = False
