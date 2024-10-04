@@ -39,11 +39,11 @@ class Obstacle:
     
 class Step(Obstacle):
     def __init__(self, pos_x_cell=0, pos_y_cell=0):
-        super().__init__(size_x_cell=2, size_y_cell=2, size_z = 0.15, pos_x_cell=pos_x_cell, pos_y_cell=pos_y_cell)
+        super().__init__(size_x_cell=4, size_y_cell=4, size_z = 0.075, pos_x_cell=pos_x_cell, pos_y_cell=pos_y_cell)
     
 class Column(Obstacle):
     def __init__(self, pos_x_cell=0, pos_y_cell=0):
-        super().__init__(size_x_cell=2, size_y_cell=2, size_z=2.0, pos_x_cell=pos_x_cell, pos_y_cell=pos_y_cell)
+        super().__init__(size_x_cell=2, size_y_cell=2, size_z=0.75, pos_x_cell=pos_x_cell, pos_y_cell=pos_y_cell)
     
 
 class Grid:

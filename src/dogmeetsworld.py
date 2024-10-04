@@ -4,6 +4,8 @@ from pydrake.all import *
 import quadruped_drake
 from quadruped_drake.controllers import *
 from quadruped_drake.planners import BasicTrunkPlanner, TowrTrunkPlanner
+import obstacles as ob
+
 import os
 import sys
 from pathlib import Path
@@ -46,8 +48,16 @@ scene_graph = builder.AddSystem(SceneGraph())
 plant = builder.AddSystem(MultibodyPlant(time_step=dt))
 plant.RegisterAsSourceForSceneGraph(scene_graph)
 quad = Parser(plant=plant).AddModelFromFile(robot_urdf, "quad")
+
+# create the obstacle environment and save it to a temporary file for towr to process
+grid = ob.Grid(size_x=5.0, size_y=5.0, res_m_p_cell=0.15)
+ob.fillObstacles(grid, density=0.13)
+world_sdf = ob.gridToSdf(grid)
+with open("/home/ws/src/savedworlds/testworld1.sdf", "w") as f:
+    f.write(world_sdf)
+
 world = Parser(plant, scene_graph, "world").AddModels(
-    "/home/ws/src/savedworlds/testworld1.sdf"
+    file_contents=world_sdf, file_type="sdf"
 )
 
 # read in world_sdf file
