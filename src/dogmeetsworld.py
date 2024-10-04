@@ -47,7 +47,7 @@ plant = builder.AddSystem(MultibodyPlant(time_step=dt))
 plant.RegisterAsSourceForSceneGraph(scene_graph)
 quad = Parser(plant=plant).AddModelFromFile(robot_urdf, "quad")
 world = Parser(plant, scene_graph, "world").AddModels(
-    "/home/ws/src/savedworlds/testworld1.sdf"
+    "/home/ws/src/savedworlds/world.sdf"
 )
 
 # read in world_sdf file

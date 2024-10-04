@@ -39,7 +39,7 @@ class Obstacle:
     
 class Step(Obstacle):
     def __init__(self, pos_x_cell=0, pos_y_cell=0):
-        super().__init__(size_x_cell=2, size_y_cell=2, size_z = 0.15, pos_x_cell=pos_x_cell, pos_y_cell=pos_y_cell)
+        super().__init__(size_x_cell=2, size_y_cell=2, size_z = 0.10, pos_x_cell=pos_x_cell, pos_y_cell=pos_y_cell)
     
 class Column(Obstacle):
     def __init__(self, pos_x_cell=0, pos_y_cell=0):
@@ -202,29 +202,6 @@ def obstacleToSdf(grid, ob, desc: str) -> str:
     
 # Convert a grid and its obstacles into an SDF string.
 def gridToSdf(grid) -> str:
-    ground_link = f"""
-          <link name="ground">
-            <pose>0 0 -0.1 0 0 0</pose>
-            <collision name="collision1">
-              <geometry>
-                <box>
-                  <size>{grid.getSizeX()} {grid.getSizeY()} 0.1</size>
-                </box>
-              </geometry>
-            </collision>
-            <visual name="visual1">
-              <geometry>
-                <box>
-                  <size>{grid.getSizeX()} {grid.getSizeY()} 0.1</size>
-                </box>
-              </geometry>
-            </visual>
-          </link>
-          <joint name="fixed_ground_joint" type="fixed">
-            <parent>world</parent>
-            <child>ground</child>
-          </joint>
-    """
 
     # create a single sdf string with each obstacle link
     obstacle_links = ""
@@ -238,7 +215,6 @@ def gridToSdf(grid) -> str:
     <sdf version="1.4">
       <world name="simple_world">
         <model name="weld_models">
-          {ground_link}
           {obstacle_links}
         </model>
       </world>

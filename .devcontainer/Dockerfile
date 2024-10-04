@@ -17,7 +17,8 @@ RUN apt update && \
     python3-dev=3.10.6-1~22.04.1 \
     python3-pip=22.0.2+dfsg-1ubuntu0.4 \
     coinor-libipopt-dev=3.11.9-2.2build5 \
-    wget
+    wget \
+    gdb
 
 # Numpy 1.26.4 is neededbecause numpy
 # 2.X had breaking changes for quadruped_drake.
@@ -61,7 +62,7 @@ RUN cd repos && \
 #     rm -r .git && \
 #     mkdir -p build && \
 #     cd build && \
-#     cmake .. && \
+#     cmake .. -DCMAKE_BUILD_TYPE=Debug && \
 #     make
 
 RUN cd repos && \

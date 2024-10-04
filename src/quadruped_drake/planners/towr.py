@@ -76,7 +76,7 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
                 "1",
                 "1.5",
                 "0.0",
-                "/home/ws/src/savedworlds/testworld1.sdf",
+                "/home/ws/src/savedworlds/world.sdf",
             ],
             env=my_env,
         )
