@@ -50,7 +50,7 @@ plant.RegisterAsSourceForSceneGraph(scene_graph)
 quad = Parser(plant=plant).AddModelFromFile(robot_urdf, "quad")
 
 # create the obstacle environment and save it to a temporary file for towr to process
-grid = ob.Grid(size_x=5.0, size_y=5.0, res_m_p_cell=0.15)
+grid = ob.Grid(size_x=5.0, size_y=5.0, res_m_p_cell=0.17)
 ob.fillObstacles(grid, density=0.13)
 world_sdf = ob.gridToSdf(grid)
 with open("/home/ws/src/savedworlds/testworld1.sdf", "w") as f:
