@@ -15,7 +15,17 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
     target motions of the base and feet.
     """
 
-    def __init__(self, trunk_geometry_frame_id):
+    def __init__(
+        self,
+        trunk_geometry_frame_id,
+        x_init: float = 0,
+        y_init: float = 0,
+        theta_init: float = 0,
+        x_final: float = 1.5,
+        y_final: float = 0,
+        theta_final: float = 0,
+        world_map: str = "/home/ws/src/savedworlds/world.sdf",
+    ):
         BasicTrunkPlanner.__init__(self, trunk_geometry_frame_id)
 
         # Set up LCM subscriber to read optimal trajectory from TOWR
@@ -31,7 +41,9 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
         self.towr_data = []
 
         # Call TOWR to generate a nominal trunk trajectory
-        self.GenerateTrunkTrajectory()
+        self.GenerateTrunkTrajectory(
+            x_init, y_init, theta_init, x_final, y_final, theta_final, world_map
+        )
 
         # Compute maximum magnitude of the control inputs (accelerations)
         self.u2_max = self.ComputeMaxControlInputs()
@@ -52,7 +64,16 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
         self.traj_finished = msg.finished  # indicate when the trajectory is over so
         # we can stop listening to LCM
 
-    def GenerateTrunkTrajectory(self):
+    def GenerateTrunkTrajectory(
+        self,
+        x_init,
+        y_init,
+        theta_init,
+        x_final,
+        y_final,
+        theta_final,
+        world_map,
+    ):
         """
         Call a TOWR cpp script to generate a trunk model trajectory.
         Read in the resulting trajectory over LCM.
@@ -74,9 +95,13 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
                 ),
                 "walk",
                 "1",
-                "1.5",
-                "0.0",
-                "/home/ws/src/savedworlds/world.sdf",
+                str(x_init),
+                str(y_init),
+                str(theta_init),
+                str(x_final),
+                str(y_final),
+                str(theta_final),
+                str(world_map),
             ],
             env=my_env,
         )

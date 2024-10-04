@@ -74,8 +74,8 @@ int main(int argc, char *argv[])
 {
 
     // Command line argument parsing
-    char usage_message[] = "Usage: trunk_mpc gait_type={walk,trot,pace,bound,gallop} optimize_gait={0,1} distance_x distance_y world_map.sdf";
-    if (argc != 6)
+    char usage_message[] = "Usage: trunk_mpc gait_type={walk,trot,pace,bound,gallop} optimize_gait={0,1} x_init, y_init, theta_init, x_final, y_final, theta_final world_map.sdf";
+    if (argc != 10)
     {
         std::cout << usage_message << std::endl;
         return 1;
@@ -111,9 +111,13 @@ int main(int argc, char *argv[])
 
     bool optimize_gait = !strcmp(argv[2], "1");
 
-    float dist_x = std::stof(argv[3]);
-    float dist_y = std::stof(argv[4]);
-    std::string world_sdf = std::string(argv[5]);
+    float x_init = std::stof(argv[3]);
+    float y_init = std::stof(argv[4]);
+    float theta_init = std::stof(argv[5]);
+    float x_final = std::stof(argv[6]);
+    float y_final = std::stof(argv[7]);
+    float theta_final = std::stof(argv[8]);
+    std::string world_sdf = std::string(argv[9]);
 
     // Set up the NLP
     NlpFormulation formulation;
@@ -132,10 +136,13 @@ int main(int argc, char *argv[])
                   [&](Eigen::Vector3d &p)
                   { p.z() = z_ground; } // feet at 0 height
     );
-    formulation.initial_base_.lin.at(kPos).z() = -nominal_stance_B.front().z() + z_ground;
+    // formulation.initial_base_.lin.at(kPos).z() = -nominal_stance_B.front().z() + z_ground;
+    formulation.initial_base_.lin.at(towr::kPos) << x_init, y_init, -nominal_stance_B.front().z() + z_ground;
+    formulation.initial_base_.ang.at(towr::kPos) << 0, 0, theta_init;
 
     // desired goal state
-    formulation.final_base_.lin.at(towr::kPos) << dist_x, dist_y, 0.2;
+    formulation.final_base_.lin.at(towr::kPos) << x_final, y_final, -nominal_stance_B.front().z() + z_ground;
+    formulation.final_base_.ang.at(towr::kPos) << 0, 0, theta_final;
 
     // Total duration of the movement
     double total_duration = 5.0;
