@@ -45,6 +45,8 @@ class Column(Obstacle):
     def __init__(self, pos_x_cell=0, pos_y_cell=0):
         super().__init__(size_x_cell=4, size_y_cell=4, size_z=0.75, pos_x_cell=pos_x_cell, pos_y_cell=pos_y_cell)
     
+g_obstacle_options = [Step(), Column()]
+
 
 class Grid:
     def __init__(self, size_x, size_y, res_m_p_cell):
@@ -123,14 +125,19 @@ class Grid:
         return False
 
 
-def randInsertObstacle(grid):
-    """Randomly choose an obstacle and location to place it in the provided grid. 
+def randInsertObstacle(grid, ob_i=None):
+    """Randomly choose an obstacle and location to place it in the provided grid.
+    :param ob_i If specified, gives the index of the obstacle type to insert.
     """
-    rand.seed()
-    obstacle_options = [Step(), Column()]
-    # randomly choose an obstacle
-    ob = copy.deepcopy(rand.choice(obstacle_options))
+    rand.seed(1)
 
+    if ob_i == None:
+        # psuedorandomly choose obstacle type
+        ob = copy.deepcopy(rand.choice(g_obstacle_options))
+    else:
+        # explicitly choose obstacle type
+        ob = copy.deepcopy(g_obstacle_options[ob_i])
+    
     for _ in range(grid.getSizeXCell() * grid.getSizeYCell()):
         # choose random location for obstacle
         ob.pos_x_cell = rand.randrange(grid.getSizeXCell())
@@ -149,18 +156,23 @@ def fillObstacles(grid, density):
     """
     # seed random number generation so that environments are consistent for particular densities
     rand.seed(1)
-    target_area = density * grid.getSizeX() * grid.getSizeY()
+    target_area = density * grid.getSizeXCell() * grid.getSizeYCell()
     
     # track current density and increment based on selected obstacle, keep going
     # until the desired density is reached
     curr_area = 0.0
+    # object type index
+    ob_i = 0
     while curr_area < target_area:
-        ob = randInsertObstacle(grid)
+        ob = randInsertObstacle(grid, ob_i)
+        # alternate between inserting each type of obstacle so that there are an
+        # equal number of obstacles of each type
+        ob_i = not ob_i
         # if ob insertion failed, then stop
         if ob == None:
             return
         # increment density
-        curr_area += ob.getSizeX(grid.getRes()) * ob.getSizeY(grid.getRes())
+        curr_area += ob.size_y_cell * ob.size_x_cell
         
     
 def obstacleToSdf(grid, ob, desc: str) -> str:
