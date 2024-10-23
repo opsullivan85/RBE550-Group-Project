@@ -74,8 +74,9 @@ int main(int argc, char *argv[])
 {
 
     // Command line argument parsing
-    char usage_message[] = "Usage: trunk_mpc gait_type={walk,trot,pace,bound,gallop} optimize_gait={0,1} x_init, y_init, theta_init, x_final, y_final, theta_final world_map.sdf";
-    if (argc != 10)
+    // fl_x, br_z, etc. are front left foot x position, back right foot z position, etc.
+    char usage_message[] = "Usage: trunk_mpc gait_type={walk,trot,pace,bound,gallop} optimize_gait={0,1} x_init, y_init, theta_init, x_final, y_final, theta_final, world_map.sdf, fl_x, fl_y, fl_z, fr_x, fr_y, fr_z, bl_x, bl_y, bl_z, br_x, br_y, br_z, duration";
+    if (argc != 23)
     {
         std::cout << usage_message << std::endl;
         return 1;
@@ -118,6 +119,20 @@ int main(int argc, char *argv[])
     float y_final = std::stof(argv[7]);
     float theta_final = std::stof(argv[8]);
     std::string world_sdf = std::string(argv[9]);
+    // TODO: figure out how to use these to set the correct initial foot positions.
+    float fl_x = std::stof(argv[10]);
+    float fl_y = std::stof(argv[11]);
+    float fl_z = std::stof(argv[12]);
+    float fr_x = std::stof(argv[13]);
+    float fr_y = std::stof(argv[14]);
+    float fr_z = std::stof(argv[15]);
+    float bl_x = std::stof(argv[16]);
+    float bl_y = std::stof(argv[17]);
+    float bl_z = std::stof(argv[18]);
+    float br_x = std::stof(argv[19]);
+    float br_y = std::stof(argv[20]);
+    float br_z = std::stof(argv[21]);
+    float total_duration = std::stof(argv[22]);
 
     // Set up the NLP
     NlpFormulation formulation;
@@ -145,7 +160,7 @@ int main(int argc, char *argv[])
     formulation.final_base_.ang.at(towr::kPos) << 0, 0, theta_final;
 
     // Total duration of the movement
-    double total_duration = 5.0;
+    // double total_duration = 5.0;
 
     // Parameters defining contact sequence and default durations. We use
     // a GaitGenerator with some predifined gaits
