@@ -23,7 +23,7 @@ control_method = "ID"  # ID = Inverse Dynamics (standard QP),
 # PC = passivity-constrained
 # CLF = control-lyapunov-function based
 
-sim_time = 6.0
+sim_time = 3
 dt = 1e-3
 target_realtime_rate = 1.0
 
@@ -32,9 +32,9 @@ make_plots = False
 
 
 x_init: float = 0
-y_init: float = -0.1
+y_init: float = 0
 theta_init: float = 0
-x_final: float = 1.5
+x_final: float = 1.5 / 2
 y_final: float = -0.2
 theta_final: float = 3.1415 / 8
 world_map: str = "/home/ws/src/savedworlds/world.sdf"
@@ -236,8 +236,8 @@ q0 = np.asarray(
     [
         1.0,
         0.0,
-        0.0,  # I suspect the base orientation is in quaternions, I'm not going to set that now
-        0.0,  # base orientation
+        0.0,
+        0.0,  # base orientation (quaternions?)
         x_init,
         y_init,
         0.3,  # base position
@@ -252,7 +252,7 @@ q0 = np.asarray(
         1.6,
         0.0,
         -0.8,
-        1.6,
+        1.6,  # I beleive these are joint angles
     ]
 )
 qd0 = np.zeros(plant.num_velocities())
