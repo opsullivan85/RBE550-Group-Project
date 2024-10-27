@@ -189,7 +189,6 @@ target_realtime_rate = 1.0
 show_diagram = False
 make_plots = False
 
-
 x_init: float = 0
 y_init: float = 0
 theta_init: float = 0
@@ -262,32 +261,38 @@ else:
     simulator.set_target_realtime_rate(target_realtime_rate)
 
 # Set initial states
+quad_model_id = plant.GetModelInstanceByName("quad")
+PositionView = namedview(
+        "Positions",
+        plant.GetPositionNames(
+            quad_model_id, always_add_suffix=False
+        ),
+    )
 plant_context = diagram.GetMutableSubsystemContext(plant, diagram_context)
-q0 = np.asarray(
-    [
-        1.0,
-        0.0,
-        0.0,
-        0.0,  # base orientation (quaternions?)
-        x_init,
-        y_init,
-        0.3,  # base position
-        0.0,
-        -0.8,
-        1.6,
-        0.0,
-        -0.8,
-        1.6,
-        0.0,
-        -0.8,
-        1.6,
-        0.0,
-        -0.8,
-        1.6,  # I beleive these are joint angles
-    ]
-)
+
+q0 = PositionView(plant.GetPositions(plant_context, quad_model_id))
+q0.body_qw = 1.0
+q0.body_qx = 0.0
+q0.body_qy = 0.0
+q0.body_qz = 0.0
+q0.body_x = x_init
+q0.body_y = y_init
+q0.body_z = 0.3
+q0.torso_to_abduct_fl_j = 0.0
+q0.abduct_fl_to_thigh_fl_j = -0.8
+q0.thigh_fl_to_knee_fl_j = 1.6
+q0.torso_to_abduct_fr_j = 0.0
+q0.abduct_fr_to_thigh_fr_j = -0.8
+q0.thigh_fr_to_knee_fr_j = 1.6
+q0.torso_to_abduct_hl_j = 0.0
+q0.abduct_hl_to_thigh_hl_j = -0.8
+q0.thigh_hl_to_knee_hl_j = 1.6
+q0.torso_to_abduct_hr_j = 0.0
+q0.abduct_hr_to_thigh_hr_j = -0.8
+q0.thigh_hr_to_knee_hr_j = 1.6
+plant.SetPositions(plant_context, quad_model_id, q0[:])
+
 qd0 = np.zeros(plant.num_velocities())
-plant.SetPositions(plant_context, q0)
 plant.SetVelocities(plant_context, qd0)
 
 # Run the simulation!
