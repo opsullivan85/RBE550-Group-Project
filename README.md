@@ -8,7 +8,7 @@ cd .devcontainer
 docker compose up --detach
 
 # open a shell in the container
-docker exec -it rbe-550-sim-1
+docker exec -it rbe-550-sim-1 bash
 
 # navigate to the directory mapped to the project directory
 cd ws
