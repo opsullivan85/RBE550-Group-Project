@@ -23,12 +23,21 @@ control_method = "ID"  # ID = Inverse Dynamics (standard QP),
 # PC = passivity-constrained
 # CLF = control-lyapunov-function based
 
-sim_time = 6.0
+sim_time = 3
 dt = 1e-3
 target_realtime_rate = 1.0
 
 show_diagram = False
 make_plots = False
+
+
+x_init: float = 0
+y_init: float = 0
+theta_init: float = 0
+x_final: float = 1.5 / 2
+y_final: float = -0.2
+theta_final: float = 3.1415 / 8
+world_map: str = "/home/ws/src/savedworlds/world.sdf"
 
 #####################################################
 
@@ -128,7 +137,18 @@ for foot in ["lf", "rf", "lh", "rh"]:
 if planning_method == "basic":
     planner = builder.AddSystem(BasicTrunkPlanner(trunk_frame_ids))
 elif planning_method == "towr":
-    planner = builder.AddSystem(TowrTrunkPlanner(trunk_frame_ids))
+    planner = builder.AddSystem(
+        TowrTrunkPlanner(
+            trunk_frame_ids,
+            x_init=x_init,
+            y_init=y_init,
+            theta_init=theta_init,
+            x_final=x_final,
+            y_final=y_final,
+            theta_final=theta_final,
+            world_map=world_map,
+        )
+    )
 else:
     print("Invalid planning method %s" % planning_method)
     sys.exit(1)
@@ -217,9 +237,9 @@ q0 = np.asarray(
         1.0,
         0.0,
         0.0,
-        0.0,  # base orientation
-        0.0,
-        0.0,
+        0.0,  # base orientation (quaternions?)
+        x_init,
+        y_init,
         0.3,  # base position
         0.0,
         -0.8,
@@ -232,7 +252,7 @@ q0 = np.asarray(
         1.6,
         0.0,
         -0.8,
-        1.6,
+        1.6,  # I beleive these are joint angles
     ]
 )
 qd0 = np.zeros(plant.num_velocities())

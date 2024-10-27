@@ -74,8 +74,9 @@ int main(int argc, char *argv[])
 {
 
     // Command line argument parsing
-    char usage_message[] = "Usage: trunk_mpc gait_type={walk,trot,pace,bound,gallop} optimize_gait={0,1} distance_x distance_y world_map.sdf";
-    if (argc != 6)
+    // fl_x, br_z, etc. are front left foot x position, back right foot z position, etc.
+    char usage_message[] = "Usage: trunk_mpc gait_type={walk,trot,pace,bound,gallop} optimize_gait={0,1} x_init, y_init, theta_init, x_final, y_final, theta_final, world_map.sdf, fl_x, fl_y, fl_z, fr_x, fr_y, fr_z, bl_x, bl_y, bl_z, br_x, br_y, br_z, duration";
+    if (argc != 23)
     {
         std::cout << usage_message << std::endl;
         return 1;
@@ -111,9 +112,26 @@ int main(int argc, char *argv[])
 
     bool optimize_gait = !strcmp(argv[2], "1");
 
-    float dist_x = std::stof(argv[3]);
-    float dist_y = std::stof(argv[4]);
-    std::string world_sdf = std::string(argv[5]);
+    float x_init = std::stof(argv[3]);
+    float y_init = std::stof(argv[4]);
+    float theta_init = std::stof(argv[5]);
+    float x_final = std::stof(argv[6]);
+    float y_final = std::stof(argv[7]);
+    float theta_final = std::stof(argv[8]);
+    std::string world_sdf = std::string(argv[9]);
+    float fl_x = std::stof(argv[10]);
+    float fl_y = std::stof(argv[11]);
+    float fl_z = std::stof(argv[12]);
+    float fr_x = std::stof(argv[13]);
+    float fr_y = std::stof(argv[14]);
+    float fr_z = std::stof(argv[15]);
+    float bl_x = std::stof(argv[16]);
+    float bl_y = std::stof(argv[17]);
+    float bl_z = std::stof(argv[18]);
+    float br_x = std::stof(argv[19]);
+    float br_y = std::stof(argv[20]);
+    float br_z = std::stof(argv[21]);
+    float total_duration = std::stof(argv[22]);
 
     // Set up the NLP
     NlpFormulation formulation;
@@ -126,19 +144,22 @@ int main(int argc, char *argv[])
 
     // initial position
     auto nominal_stance_B = formulation.model_.kinematic_model_->GetNominalStanceInBase();
+    nominal_stance_B.at(LF) << fl_x, fl_y, fl_z;
+    nominal_stance_B.at(RF) << fr_x, fr_y, fr_z;
+    nominal_stance_B.at(LH) << bl_x, bl_y, bl_z;
+    nominal_stance_B.at(RH) << br_x, br_y, br_z;
+    // TODO: I beleive this is preventing the correct estimation of the body height
     double z_ground = 0.0;
     formulation.initial_ee_W_ = nominal_stance_B;
-    std::for_each(formulation.initial_ee_W_.begin(), formulation.initial_ee_W_.end(),
-                  [&](Eigen::Vector3d &p)
-                  { p.z() = z_ground; } // feet at 0 height
-    );
-    formulation.initial_base_.lin.at(kPos).z() = -nominal_stance_B.front().z() + z_ground;
+    // formulation.initial_base_.lin.at(kPos).z() = -nominal_stance_B.front().z() + z_ground;
+    formulation.initial_base_.lin.at(towr::kPos) << x_init, y_init, 0.3;
+    formulation.initial_base_.ang.at(towr::kPos) << 0, 0, theta_init;
 
     // desired goal state
-    formulation.final_base_.lin.at(towr::kPos) << dist_x, dist_y, 0.2;
+    // formulation.final_base_.lin.at(towr::kPos) << x_final, y_final, -nominal_stance_B.front().z() + z_ground;
+    formulation.final_base_.lin.at(towr::kPos) << x_final, y_final, 0.3;
+    formulation.final_base_.ang.at(towr::kPos) << 0, 0, theta_final;
 
-    // Total duration of the movement
-    double total_duration = 5.0;
 
     // Parameters defining contact sequence and default durations. We use
     // a GaitGenerator with some predifined gaits
@@ -175,7 +196,12 @@ int main(int argc, char *argv[])
     // solver->SetOption("derivative_test", "first-order");
     auto solver = std::make_shared<ifopt::IpoptSolver>();
     solver->SetOption("jacobian_approximation", "exact"); // "finite difference-values"
-    solver->SetOption("max_cpu_time", 50.0);
+    solver->SetOption("hessian_approximation", "limited-memory");
+    solver->SetOption("acceptable_iter", 15);
+    solver->SetOption("acceptable_tol", 1e-3);
+    solver->SetOption("max_iter", 500);
+    solver->SetOption("max_cpu_time", 8.0);
+    solver->SetOption("tol", 1e-4);
     solver->Solve(nlp);
 
     // Send solution over LCM

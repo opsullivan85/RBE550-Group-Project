@@ -216,6 +216,7 @@ namespace towr
 
   double GridSDF::GetHeight(double x, double y) const
   {
+    // return std::max(std::floor(x)/10, 0);
     double height = 0.0;
 
     // Loop through each body in the plant
@@ -230,15 +231,15 @@ namespace towr
       Eigen::Vector3d position = X_WB.translation();
 
       // Check if the coordinate falls within this body's footprint
-      const double prism_width = 10;
-      const double prism_depth = 10;
+      const double prism_width = 0.5;
+      const double prism_depth = 0.5;
 
       if (x >= position.x() - prism_width / 2 &&
           x <= position.x() + prism_width / 2 &&
           y >= position.y() - prism_depth / 2 &&
           y <= position.y() + prism_depth / 2)
       {
-        height = position.z(); // Assuming the prism’s top corresponds to the height
+        height = 2 * position.z(); // Assuming the prism’s top corresponds to the height
         break;
       }
     }

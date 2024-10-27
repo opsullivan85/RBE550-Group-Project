@@ -2,11 +2,31 @@ from planners.simple import *
 import subprocess as sub
 import os
 from pathlib import Path
+from collections import namedtuple
 
 import lcm
 from lcm_types.trunklcm import trunk_state_t
 
 import time
+
+_fields = (
+    "fl_x",
+    "fl_y",
+    "fl_z",
+    "fr_x",
+    "fr_y",
+    "fr_z",
+    "bl_x",
+    "bl_y",
+    "bl_z",
+    "br_x",
+    "br_y",
+    "br_z",
+)
+_x, _y, _z = 0.2, 0.11, 0
+# _x, _y, _z = 0.2, 0.11, -0.3
+_defaults = (_x, _y, _z, _x, -_y, _z, -_x, _y, _z, -_x, -_y, _z)
+FootPositions = namedtuple("FootPositions", field_names=_fields, defaults=_defaults)
 
 
 class TowrTrunkPlanner(BasicTrunkPlanner):
@@ -15,7 +35,20 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
     target motions of the base and feet.
     """
 
-    def __init__(self, trunk_geometry_frame_id):
+    def __init__(
+        self,
+        trunk_geometry_frame_id,
+        x_init: float = 0,
+        y_init: float = 0,
+        theta_init: float = 0,
+        x_final: float = 1.5,
+        y_final: float = 0,
+        theta_final: float = 0,
+        foot_positions: FootPositions = None,
+        world_map: str = "/home/ws/src/savedworlds/world.sdf",
+        duration=2.5,
+    ):
+        foot_positions = foot_positions or FootPositions()
         BasicTrunkPlanner.__init__(self, trunk_geometry_frame_id)
 
         # Set up LCM subscriber to read optimal trajectory from TOWR
@@ -31,7 +64,17 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
         self.towr_data = []
 
         # Call TOWR to generate a nominal trunk trajectory
-        self.GenerateTrunkTrajectory()
+        self.GenerateTrunkTrajectory(
+            x_init,
+            y_init,
+            theta_init,
+            x_final,
+            y_final,
+            theta_final,
+            world_map,
+            foot_positions,
+            duration,
+        )
 
         # Compute maximum magnitude of the control inputs (accelerations)
         self.u2_max = self.ComputeMaxControlInputs()
@@ -52,7 +95,18 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
         self.traj_finished = msg.finished  # indicate when the trajectory is over so
         # we can stop listening to LCM
 
-    def GenerateTrunkTrajectory(self):
+    def GenerateTrunkTrajectory(
+        self,
+        x_init: float,
+        y_init: float,
+        theta_init: float,
+        x_final: float,
+        y_final: float,
+        theta_final: float,
+        world_map: str,
+        foot_positions: FootPositions,
+        duration: float,
+    ):
         """
         Call a TOWR cpp script to generate a trunk model trajectory.
         Read in the resulting trajectory over LCM.
@@ -73,10 +127,27 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
                     .joinpath("trunk_mpc")
                 ),
                 "walk",
-                "1",
-                "1.5",
-                "0.0",
-                "/home/ws/src/savedworlds/testworld1.sdf",
+                "0",
+                str(x_init),
+                str(y_init),
+                str(theta_init),
+                str(x_final),
+                str(y_final),
+                str(theta_final),
+                str(world_map),
+                str(foot_positions.fl_x),
+                str(foot_positions.fl_y),
+                str(foot_positions.fl_z),
+                str(foot_positions.fr_x),
+                str(foot_positions.fr_y),
+                str(foot_positions.fr_z),
+                str(foot_positions.bl_x),
+                str(foot_positions.bl_y),
+                str(foot_positions.bl_z),
+                str(foot_positions.br_x),
+                str(foot_positions.br_y),
+                str(foot_positions.br_z),
+                str(duration),
             ],
             env=my_env,
         )
