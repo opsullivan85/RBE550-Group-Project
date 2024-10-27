@@ -4,6 +4,7 @@ from pydrake.all import *
 import quadruped_drake
 from quadruped_drake.controllers import *
 from quadruped_drake.planners import BasicTrunkPlanner, TowrTrunkPlanner
+import pydot
 import obstacles as ob
 
 import os
@@ -109,15 +110,15 @@ def makePlanner(planning_method, world_map_path):
 def makeController(control_method, plant, dt):
     # low-level whole-body controller
     if control_method == "B":
-        controller = builder.AddSystem(BasicController(plant, dt, use_lcm=use_lcm))
+        controller = builder.AddSystem(BasicController(plant, dt))
     elif control_method == "ID":
-        controller = builder.AddSystem(IDController(plant, dt, use_lcm=use_lcm))
+        controller = builder.AddSystem(IDController(plant, dt))
     elif control_method == "MPTC":
-        controller = builder.AddSystem(MPTCController(plant, dt, use_lcm=use_lcm))
+        controller = builder.AddSystem(MPTCController(plant, dt))
     elif control_method == "PC":
-        controller = builder.AddSystem(PCController(plant, dt, use_lcm=use_lcm))
+        controller = builder.AddSystem(PCController(plant, dt))
     elif control_method == "CLF":
-        controller = builder.AddSystem(CLFController(plant, dt, use_lcm=use_lcm))
+        controller = builder.AddSystem(CLFController(plant, dt))
     else:
         print("Invalid control method %s" % control_method)
         sys.exit(1)
@@ -173,7 +174,6 @@ quadruped_drake_path = str(Path(quadruped_drake.__file__).parent)
 
 ############### Common Parameters ###################
 show_trunk_model = True
-use_lcm = False
 
 planning_method = "basic"  # "towr" or "basic"
 control_method = "ID"  # ID = Inverse Dynamics (standard QP),
@@ -253,13 +253,7 @@ if show_diagram:
 
 # Simulator setup
 simulator = Simulator(diagram, diagram_context)
-if use_lcm:
-    # If we're using LCM to send messages to another simulator or a real
-    # robot, we don't want Drake to slow things down, so we'll publish
-    # new messages as fast as possible
-    simulator.set_target_realtime_rate(0.0)
-else:
-    simulator.set_target_realtime_rate(target_realtime_rate)
+simulator.set_target_realtime_rate(target_realtime_rate)
 
 # Set initial states
 plant_context = diagram.GetMutableSubsystemContext(plant, diagram_context)
@@ -290,38 +284,8 @@ qd0 = np.zeros(plant.num_velocities())
 plant.SetPositions(plant_context, q0)
 plant.SetVelocities(plant_context, qd0)
 
+# Visualize the diagram.
+pydot.graph_from_dot_data(diagram.GetGraphvizString(max_depth=1))[0].write_svg("diagram.svg")
+
 # Run the simulation!
 simulator.AdvanceTo(sim_time)
-
-if make_plots:
-    import matplotlib.pyplot as plt
-
-    log = logger.FindLog(diagram_context)
-
-    # Plot stuff
-    t = log.sample_times()[10:]
-    V = log.data()[0, 10:]
-    err = log.data()[1, 10:]
-    res = log.data()[2, 10:]
-    Vdot = log.data()[3, 10:]
-
-    plt.figure()
-    # plt.subplot(4,1,1)
-    # plt.plot(t, res, linewidth='2')
-    # plt.ylabel("Residual")
-
-    plt.subplot(3, 1, 1)
-    plt.plot(t, Vdot, linewidth="2")
-    plt.axhline(0, linestyle="dashed", color="grey")
-    plt.ylabel("$\dot{V}$")
-
-    plt.subplot(3, 1, 2)
-    plt.plot(t, V, linewidth="2")
-    plt.ylabel("$V$")
-
-    plt.subplot(3, 1, 3)
-    plt.plot(t, err, linewidth="2")
-    plt.ylabel("$\|y_1-y_2\|^2$")
-    plt.xlabel("time (s)")
-
-    plt.show()
