@@ -8,15 +8,16 @@ CMD ["/bin/bash"]
 
 RUN apt update && \
     DEBIAN_FRONTEND=noninteractive apt install -y \
-    git-all=1:2.34.1-1ubuntu1.11 \
-    cmake=3.22.1-1ubuntu1.22.04.2 \
-    clang=1:14.0-55~exp2 \
-    build-essential=12.9ubuntu3 \
-    libglib2.0-dev=2.72.4-0ubuntu2.3 \
-    libeigen3-dev=3.4.0-2ubuntu2 \
-    python3-dev=3.10.6-1~22.04.1 \
-    python3-pip=22.0.2+dfsg-1ubuntu0.4 \
-    coinor-libipopt-dev=3.11.9-2.2build5 \
+    git-all \
+    cmake \
+    clang \
+    build-essential \
+    libglib2.0-dev \
+    libeigen3-dev \
+    python3-dev \
+    python3-pip \
+    python3-tk \
+    coinor-libipopt-dev \
     wget \
     gdb
 
@@ -26,7 +27,8 @@ RUN apt update && \
 # with quadruped_drake
 RUN pip3 install \
     numpy==1.26.4 \
-    drake==1.24.0
+    drake==1.24.0 \
+    matplotlib
 
 # IFOPT
 RUN mkdir repos && \
