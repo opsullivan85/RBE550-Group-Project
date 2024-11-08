@@ -117,10 +117,10 @@ planner = builder.AddSystem(
         trunk_frame_ids,
         x_init=x_init,
         y_init=y_init,
-        theta_init=theta_init,
+        yaw_init=theta_init,
         x_final=x_final,
         y_final=y_final,
-        theta_final=theta_final,
+        yaw_final=theta_final,
         world_map=world_map,
         foot_positions=default_foot_positions
     )
