@@ -8,7 +8,7 @@ def subdivide(path: np.ndarray, num: int) -> np.ndarray:
 
     Args:
         path (Path): Path to subdivide.
-            shape (n, 2).
+            shape (n, m), where m is the dimensionality of the system.
         num (int): Number of points per subdivided line.
             minimum of 2 (ie no subdivision)
 
@@ -46,16 +46,17 @@ def pure_pursuit(path: np.ndarray, agent_position: np.ndarray, radius: float, su
 
     Args:
         path (np.ndarray): Path to follow.
-            shape (n, 2)
+            shape (n, m), where m is the dimensionality of the system.
         agent_position (np.ndarray): Position of the agent.
-            shape (2,)
+            shape (m,)
         radius (float): Lookahead distance for the algorithm.
+            defined as a radius in `m` dimensional space.
         subdivision_num (int): Number of points per subdivided line.
             minimum of 2 (ie no subdivision). Default is 10.
 
     Returns:
         np.ndarray: A vector from the `agent_position` to the pure_pursuit target.
-            Shape is (2,). Not normalized, but will usually have magnatude ~= `radius`,
+            Shape is (m,). Not normalized, but will usually have magnatude ~= `radius`,
             with some exceptions
     """
     subdivision = subdivide(path=path, num=subdivision_num)
