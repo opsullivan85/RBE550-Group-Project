@@ -28,7 +28,8 @@ RUN apt update && \
 RUN pip3 install \
     numpy==1.26.4 \
     drake==1.24.0 \
-    matplotlib
+    matplotlib \
+    scipy==1.14.1
 
 # IFOPT
 RUN mkdir repos && \
