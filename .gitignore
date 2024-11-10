@@ -5,3 +5,4 @@ __pycache__
 world.sdf
 build
 diagram.svg
+*.png
