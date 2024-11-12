@@ -11,6 +11,33 @@ import os
 import sys
 from pathlib import Path
 
+############### Common Parameters ###################
+show_trunk_model = True
+
+planning_method = "basic"  # "towr" or "basic"
+control_method = "ID"  # ID = Inverse Dynamics (standard QP),
+# B = Basic (simple joint-space PD),
+# MPTC = task-space passivity
+# PC = passivity-constrained
+# CLF = control-lyapunov-function based
+
+sim_time = 1000.0 # make it long
+dt = 1e-3
+target_realtime_rate = 1.0
+
+show_diagram = False
+make_plots = False
+
+x_init: float = 0.1
+y_init: float = -2.0
+theta_init: float = 0
+x_final: float = 1.5 / 2
+y_final: float = -0.2
+theta_final: float = 3.1415 / 8
+world_map_path: str = "/home/ws/src/world.sdf"
+
+#####################################################
+
 
 def createWorld(world_map_path):
     # create the obstacle environment and save it to a temporary file for towr to process
@@ -53,9 +80,9 @@ def addTrunkGeometry(scene_graph):
     scene_graph.RegisterFrame(trunk_source_id, trunk_frame)
 
     trunk_shape = Box(0.4, 0.2, 0.1)
-    trunk_color = np.array([0.1, 0.1, 0.1, 0.4])
+    trunk_color = np.array([0.1, 0.1, 0.3, 0.4])
     X_trunk = RigidTransform()
-    X_trunk.set_translation(np.array([0.0, 0.0, 0.0]))
+    X_trunk.set_translation(np.array([x_init, y_init, 0.0]))
 
     trunk_geometry = GeometryInstance(X_trunk, trunk_shape, "trunk")
     if show_trunk_model:
@@ -72,6 +99,7 @@ def addTrunkGeometry(scene_graph):
 
         foot_shape = Sphere(0.02)
         X_foot = RigidTransform()
+        X_foot.set_translation(np.array([x_init, y_init, 0.0]))
         foot_geometry = GeometryInstance(X_foot, foot_shape, foot)
         if show_trunk_model:
             foot_geometry.set_illustration_properties(
@@ -171,33 +199,6 @@ def setupVisualization(builder, scene_graph, publish_period = None):
 
 
 quadruped_drake_path = str(Path(quadruped_drake.__file__).parent)
-
-############### Common Parameters ###################
-show_trunk_model = True
-
-planning_method = "basic"  # "towr" or "basic"
-control_method = "ID"  # ID = Inverse Dynamics (standard QP),
-# B = Basic (simple joint-space PD),
-# MPTC = task-space passivity
-# PC = passivity-constrained
-# CLF = control-lyapunov-function based
-
-sim_time = 1000.0 # make it long
-dt = 1e-3
-target_realtime_rate = 1.0
-
-show_diagram = False
-make_plots = False
-
-x_init: float = 0
-y_init: float = 0
-theta_init: float = 0
-x_final: float = 1.5 / 2
-y_final: float = -0.2
-theta_final: float = 3.1415 / 8
-world_map_path: str = "/home/ws/src/world.sdf"
-
-#####################################################
 
 # Drake only loads things relative to the drake path, so we have to do some hacking
 # to load an arbitrary file
