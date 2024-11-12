@@ -75,8 +75,8 @@ int main(int argc, char *argv[])
 
     // Command line argument parsing
     // fl_x, br_z, etc. are front left foot x position, back right foot z position, etc.
-    char usage_message[] = "Usage: trunk_mpc gait_type={walk,trot,pace,bound,gallop} optimize_gait={0,1} x_init, y_init, theta_init, x_final, y_final, theta_final, world_map.sdf, fl_x, fl_y, fl_z, fr_x, fr_y, fr_z, bl_x, bl_y, bl_z, br_x, br_y, br_z, duration";
-    if (argc != 23)
+    char usage_message[] = "Usage: trunk_mpc gait_type={walk,trot,pace,bound,gallop} optimize_gait={0,1} x_init, y_init, yaw_init, x_final, y_final, yaw_final, world_map.sdf, fl_x, fl_y, fl_z, fr_x, fr_y, fr_z, bl_x, bl_y, bl_z, br_x, br_y, br_z, trunk_z_init, trunk_z_final, roll_init, pitch_init, roll_final, pitch_final, duration";
+    if (argc != 29)
     {
         std::cout << usage_message << std::endl;
         return 1;
@@ -114,10 +114,10 @@ int main(int argc, char *argv[])
 
     float x_init = std::stof(argv[3]);
     float y_init = std::stof(argv[4]);
-    float theta_init = std::stof(argv[5]);
+    float yaw_init = std::stof(argv[5]);
     float x_final = std::stof(argv[6]);
     float y_final = std::stof(argv[7]);
-    float theta_final = std::stof(argv[8]);
+    float yaw_final = std::stof(argv[8]);
     std::string world_sdf = std::string(argv[9]);
     float fl_x = std::stof(argv[10]);
     float fl_y = std::stof(argv[11]);
@@ -131,7 +131,13 @@ int main(int argc, char *argv[])
     float br_x = std::stof(argv[19]);
     float br_y = std::stof(argv[20]);
     float br_z = std::stof(argv[21]);
-    float total_duration = std::stof(argv[22]);
+    float trunk_z_init = std::stof(argv[22]);
+    float trunk_z_final = std::stof(argv[23]);
+    float roll_init = std::stof(argv[24]);
+    float pitch_init = std::stof(argv[25]);
+    float roll_final = std::stof(argv[26]);
+    float pitch_final = std::stof(argv[27]);
+    float total_duration = std::stof(argv[28]);
 
     // Set up the NLP
     NlpFormulation formulation;
@@ -152,14 +158,13 @@ int main(int argc, char *argv[])
     double z_ground = 0.0;
     formulation.initial_ee_W_ = nominal_stance_B;
     // formulation.initial_base_.lin.at(kPos).z() = -nominal_stance_B.front().z() + z_ground;
-    formulation.initial_base_.lin.at(towr::kPos) << x_init, y_init, 0.3;
-    formulation.initial_base_.ang.at(towr::kPos) << 0, 0, theta_init;
+    formulation.initial_base_.lin.at(towr::kPos) << x_init, y_init, trunk_z_init;
+    formulation.initial_base_.ang.at(towr::kPos) << roll_init, pitch_init, yaw_init;
 
     // desired goal state
     // formulation.final_base_.lin.at(towr::kPos) << x_final, y_final, -nominal_stance_B.front().z() + z_ground;
-    formulation.final_base_.lin.at(towr::kPos) << x_final, y_final, 0.3;
-    formulation.final_base_.ang.at(towr::kPos) << 0, 0, theta_final;
-
+    formulation.final_base_.lin.at(towr::kPos) << x_final, y_final, trunk_z_final;
+    formulation.final_base_.ang.at(towr::kPos) << roll_final, pitch_final, yaw_final;
 
     // Parameters defining contact sequence and default durations. We use
     // a GaitGenerator with some predifined gaits

@@ -24,9 +24,24 @@ _fields = (
     "br_z",
 )
 _x, _y, _z = 0.2, 0.11, 0
-# _x, _y, _z = 0.2, 0.11, -0.3
 _defaults = (_x, _y, _z, _x, -_y, _z, -_x, _y, _z, -_x, -_y, _z)
 FootPositions = namedtuple("FootPositions", field_names=_fields, defaults=_defaults)
+"""Stores foot positions
+
+Args:
+    fl_x (float). Front left leg x position. Optional, defaults to leg extended position.
+    fl_y (float). Front left leg y position. Optional, defaults to leg extended position.
+    fl_z (float). Front left leg z position. Optional, defaults to leg extended position.
+    fr_x (float). Front right leg x position. Optional, defaults to leg extended position.
+    fr_y (float). Front right leg y position. Optional, defaults to leg extended position.
+    fr_z (float). Front right leg z position. Optional, defaults to leg extended position.
+    bl_x (float). Back left leg x position. Optional, defaults to leg extended position.
+    bl_y (float). Back left leg y position. Optional, defaults to leg extended position.
+    bl_z (float). Back left leg z position. Optional, defaults to leg extended position.
+    br_x (float). Back right leg x position. Optional, defaults to leg extended position.
+    br_y (float). Back right leg y position. Optional, defaults to leg extended position.
+    br_z (float). Back right leg z position. Optional, defaults to leg extended position.
+"""
 
 
 class TowrTrunkPlanner(BasicTrunkPlanner):
@@ -40,10 +55,16 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
         trunk_geometry_frame_id,
         x_init: float = 0,
         y_init: float = 0,
-        theta_init: float = 0,
+        z_init: float = 0.3,
+        roll_init: float = 0,
+        pitch_init: float = 0,
+        yaw_init: float = 0,
         x_final: float = 1.5,
         y_final: float = 0,
-        theta_final: float = 0,
+        z_final: float = 0.3,
+        roll_final: float = 0,
+        pitch_final: float = 0,
+        yaw_final: float = 0,
         foot_positions: FootPositions = None,
         world_map: str = "/home/ws/src/savedworlds/world.sdf",
         duration=2.5,
@@ -65,15 +86,21 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
 
         # Call TOWR to generate a nominal trunk trajectory
         self.GenerateTrunkTrajectory(
-            x_init,
-            y_init,
-            theta_init,
-            x_final,
-            y_final,
-            theta_final,
-            world_map,
-            foot_positions,
-            duration,
+            x_init=x_init,
+            y_init=y_init,
+            z_init=z_init,
+            roll_init=roll_init,
+            pitch_init=pitch_init,
+            yaw_init=yaw_init,
+            x_final=x_final,
+            y_final=y_final,
+            z_final=z_final,
+            roll_final=roll_final,
+            pitch_final=pitch_final,
+            yaw_final=yaw_final,
+            world_map=world_map,
+            foot_positions=foot_positions,
+            duration=duration,
         )
 
         # Compute maximum magnitude of the control inputs (accelerations)
@@ -99,10 +126,16 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
         self,
         x_init: float,
         y_init: float,
-        theta_init: float,
+        z_init: float,
+        roll_init: float,
+        pitch_init: float,
+        yaw_init: float,
         x_final: float,
         y_final: float,
-        theta_final: float,
+        z_final: float,
+        roll_final: float,
+        pitch_final: float,
+        yaw_final: float,
         world_map: str,
         foot_positions: FootPositions,
         duration: float,
@@ -130,10 +163,10 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
                 "0",
                 str(x_init),
                 str(y_init),
-                str(theta_init),
+                str(yaw_init),
                 str(x_final),
                 str(y_final),
-                str(theta_final),
+                str(yaw_final),
                 str(world_map),
                 str(foot_positions.fl_x),
                 str(foot_positions.fl_y),
@@ -147,6 +180,12 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
                 str(foot_positions.br_x),
                 str(foot_positions.br_y),
                 str(foot_positions.br_z),
+                str(z_init),
+                str(z_final),
+                str(roll_init),
+                str(pitch_init),
+                str(roll_final),
+                str(pitch_final),
                 str(duration),
             ],
             env=my_env,
