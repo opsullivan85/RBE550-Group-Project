@@ -14,7 +14,7 @@ from pathlib import Path
 ############### Common Parameters ###################
 show_trunk_model = True
 
-planning_method = "basic"  # "towr" or "basic"
+planning_method = "towr"  # "towr" or "basic"
 control_method = "ID"  # ID = Inverse Dynamics (standard QP),
 # B = Basic (simple joint-space PD),
 # MPTC = task-space passivity
@@ -28,12 +28,12 @@ target_realtime_rate = 1.0
 show_diagram = False
 make_plots = False
 
-x_init: float = 0.1
-y_init: float = -2.0
-theta_init: float = 0
-x_final: float = 1.5 / 2
-y_final: float = -0.2
-theta_final: float = 3.1415 / 8
+x_init: float = 0.0
+y_init: float = 1.0
+theta_init: float = 0.0
+x_final: float = 2.0
+y_final: float = 1.0
+theta_final: float = 3.1415 / 2
 world_map_path: str = "/home/ws/src/world.sdf"
 
 #####################################################
@@ -42,7 +42,7 @@ world_map_path: str = "/home/ws/src/world.sdf"
 def createWorld(world_map_path):
     # create the obstacle environment and save it to a temporary file for towr to process
     grid = ob.Grid(size_x=5.0, size_y=5.0, res_m_p_cell=0.17)
-    ob.fillObstacles(grid, density=0.13)
+    ob.fillObstacles(grid, density=0.05)
     world_sdf = ob.gridToSdf(grid)
     with open(world_map_path, "w") as f:
         f.write(world_sdf)
@@ -82,7 +82,7 @@ def addTrunkGeometry(scene_graph):
     trunk_shape = Box(0.4, 0.2, 0.1)
     trunk_color = np.array([0.1, 0.1, 0.3, 0.4])
     X_trunk = RigidTransform()
-    X_trunk.set_translation(np.array([x_init, y_init, 0.0]))
+    X_trunk.set_translation(np.array([0.0, 0.0, 0.0]))
 
     trunk_geometry = GeometryInstance(X_trunk, trunk_shape, "trunk")
     if show_trunk_model:
@@ -99,7 +99,7 @@ def addTrunkGeometry(scene_graph):
 
         foot_shape = Sphere(0.02)
         X_foot = RigidTransform()
-        X_foot.set_translation(np.array([x_init, y_init, 0.0]))
+        X_foot.set_translation(np.array([0.00, 0.00, 0.00]))
         foot_geometry = GeometryInstance(X_foot, foot_shape, foot)
         if show_trunk_model:
             foot_geometry.set_illustration_properties(
@@ -115,7 +115,11 @@ def addTrunkGeometry(scene_graph):
 def makePlanner(planning_method, world_map_path):
     # high-level trunk-model planner
     if planning_method == "basic":
-        planner = builder.AddSystem(BasicTrunkPlanner(trunk_frame_ids))
+        bt_planner = BasicTrunkPlanner(trunk_frame_ids,
+                                       x_init=x_init,
+                                       y_init=y_init)
+        planner = builder.AddSystem(bt_planner)
+        
     elif planning_method == "towr":
         planner = builder.AddSystem(
             TowrTrunkPlanner(
@@ -126,7 +130,7 @@ def makePlanner(planning_method, world_map_path):
                 x_final=x_final,
                 y_final=y_final,
                 yaw_final=theta_final,
-                world_map=world_map,
+                world_map=world_map_path,
             )
         )
     else:
@@ -264,6 +268,7 @@ PositionView = namedview(
         ),
     )
 plant_context = diagram.GetMutableSubsystemContext(plant, diagram_context)
+
 
 q0 = PositionView(plant.GetPositions(plant_context, quad_model_id))
 q0.body_qw = 1.0

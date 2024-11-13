@@ -150,10 +150,10 @@ int main(int argc, char *argv[])
 
     // initial position
     auto nominal_stance_B = formulation.model_.kinematic_model_->GetNominalStanceInBase();
-    nominal_stance_B.at(LF) << fl_x, fl_y, fl_z;
-    nominal_stance_B.at(RF) << fr_x, fr_y, fr_z;
-    nominal_stance_B.at(LH) << bl_x, bl_y, bl_z;
-    nominal_stance_B.at(RH) << br_x, br_y, br_z;
+    nominal_stance_B.at(LF) << fl_x + x_init, fl_y + y_init, fl_z;
+    nominal_stance_B.at(RF) << fr_x + x_init, fr_y + y_init, fr_z;
+    nominal_stance_B.at(LH) << bl_x + x_init, bl_y + y_init, bl_z;
+    nominal_stance_B.at(RH) << br_x + x_init, br_y + y_init, br_z;
     // TODO: I beleive this is preventing the correct estimation of the body height
     double z_ground = 0.0;
     formulation.initial_ee_W_ = nominal_stance_B;

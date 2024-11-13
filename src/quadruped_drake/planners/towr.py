@@ -70,7 +70,7 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
         duration=2.5,
     ):
         foot_positions = foot_positions or FootPositions()
-        BasicTrunkPlanner.__init__(self, trunk_geometry_frame_id)
+        BasicTrunkPlanner.__init__(self, trunk_geometry_frame_id, x_init=x_init, y_init=y_init)
 
         # Set up LCM subscriber to read optimal trajectory from TOWR
         self.lc = lcm.LCM()
@@ -107,7 +107,7 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
         self.u2_max = self.ComputeMaxControlInputs()
 
         # Time to wait in a standing position before starting the motion
-        self.wait_time = 1.0
+        self.wait_time = 2.0
 
     def lcm_handler(self, channel, data):
         """
@@ -235,7 +235,7 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
 
         else:
             # Find the timestamp in the (stored) TOWR trajectory that is closest
-            # to the curren time
+            # to the current time
             t -= self.wait_time
             closest_index = np.abs(np.array(self.towr_timestamps) - t).argmin()
             closest_towr_t = self.towr_timestamps[closest_index]

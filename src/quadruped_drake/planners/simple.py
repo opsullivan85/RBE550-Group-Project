@@ -7,8 +7,10 @@ class BasicTrunkPlanner(LeafSystem):
     desired positions, velocities, and accelerations for the feet, center-of-mass,
     and body frame orientation. 
     """
-    def __init__(self, frame_ids):
+    def __init__(self, frame_ids, x_init, y_init):
         LeafSystem.__init__(self)
+        self.x_init = x_init
+        self.y_init = y_init
 
         # Dictionary of geometry frame ids {"trunk": trunk_frame_id, "lf": lf_foot_frame_id, ...}
         self.frame_ids = frame_ids
@@ -42,10 +44,10 @@ class BasicTrunkPlanner(LeafSystem):
         standing on all four feet.
         """
         # Foot positions
-        self.output_dict["p_lf"] = np.array([ 0.175, 0.11, 0.0])   # mini cheetah
-        self.output_dict["p_rf"] = np.array([ 0.175,-0.11, 0.0])
-        self.output_dict["p_lh"] = np.array([-0.2,   0.11, 0.0])
-        self.output_dict["p_rh"] = np.array([-0.2,  -0.11, 0.0])
+        self.output_dict["p_lf"] = np.array([ 0.175 + self.x_init, 0.11 + self.y_init, 0.0])   # mini cheetah
+        self.output_dict["p_rf"] = np.array([ 0.175 + self.x_init,-0.11 + self.y_init, 0.0])
+        self.output_dict["p_lh"] = np.array([-0.2 + self.x_init,   0.11 + self.y_init, 0.0])
+        self.output_dict["p_rh"] = np.array([-0.2 + self.x_init,  -0.11 + self.y_init, 0.0])
         #self.output_dict["p_lf"] = np.array([ 0.34, 0.19, 0.0])    # anymal
         #self.output_dict["p_rf"] = np.array([ 0.34,-0.19, 0.0])
         #self.output_dict["p_lh"] = np.array([-0.34, 0.19, 0.0])
@@ -71,7 +73,7 @@ class BasicTrunkPlanner(LeafSystem):
 
         # Body pose
         self.output_dict["rpy_body"] = np.array([0.0, 0.0, 0.0])
-        self.output_dict["p_body"] = np.array([0.0, 0.0, 0.3])
+        self.output_dict["p_body"] = np.array([self.x_init, self.y_init, 0.3])
 
         # Body velocities
         self.output_dict["rpyd_body"] = np.zeros(3)
