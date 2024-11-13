@@ -60,7 +60,7 @@ class SimAgent(SimObject):
 
     @property
     @abstractmethod
-    def previous_control(self) -> Optional[Control]:
+    def _previous_control(self) -> Optional[Control]:
         """Most recently applied control input"""
         ...
 

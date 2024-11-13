@@ -95,3 +95,26 @@ def drop_invalid_coordinates(coordinates: np.ndarray, array: np.ndarray) -> np.n
     )
     coordinates = coordinates[:, valid_coordinate_mask]
     return coordinates
+
+
+def unit_vectors_2d(n: int, theta: float = 0) -> np.ndarray:
+    """Generate equally spaced unit vectors, clocked by a theta value
+
+    Args:
+        n (int): number of vectors to create
+        theta (float, optional): Clocking value. Defaults to 0.
+
+    Returns:
+        np.ndarray: Unit vectors. shape=(n,2)
+    """
+    angles = np.linspace(0, 2 * np.pi, n, endpoint=False)
+    unit_vectors = np.column_stack((np.cos(angles), np.sin(angles)))
+
+    # Create rotation matrix for angle `theta`
+    rotation_matrix = np.array(
+        ((np.cos(theta), -np.sin(theta)), (np.sin(theta), np.cos(theta)))
+    )
+
+    # Rotate each unit vector
+    rotated_vectors = unit_vectors @ rotation_matrix.T
+    return rotated_vectors
