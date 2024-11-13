@@ -10,6 +10,7 @@ import pyglet
 import shapely
 
 from control import Control
+from camera import Camera
 from simulation import SimAgent, SimObject
 from states import Position
 from util import transform_2d, unit_vectors_2d
@@ -204,12 +205,12 @@ class HoloQuad(SimAgent):
 
         heuristic = sum(
             (
-                distance * 1,
+                distance * 10,
                 velocity_contribution * 2,
                 theta_contribution * 10,
                 search_depth * 0.1,
-                lazy_turning * 1,
-                lazy_acceleration * 1,
+                lazy_turning * 0.1,
+                lazy_acceleration * 0.1,
             )
         )
 
@@ -275,6 +276,4 @@ if __name__ == "__main__":
         target_state=target_state,
         dt=0.1,
         state_space_bin_sizes=state_space_bin_sizes,
-        visualize=1,
-        camera=None,
     )
