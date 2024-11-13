@@ -12,6 +12,8 @@ import sys
 from pathlib import Path
 
 
+
+
 def createWorld(world_map_path):
     # create the obstacle environment and save it to a temporary file for towr to process
     grid = ob.Grid(size_x=5.0, size_y=5.0, res_m_p_cell=0.17)
@@ -189,6 +191,7 @@ target_realtime_rate = 1.0
 show_diagram = False
 make_plots = False
 
+# todo: create start and end positions
 x_init: float = 0
 y_init: float = 0
 theta_init: float = 0
@@ -217,6 +220,14 @@ plant.RegisterAsSourceForSceneGraph(scene_graph)
 quad = Parser(plant=plant).AddModelFromFile(robot_urdf, "quad")
 
 world = createWorld(world_map_path)
+
+# todo: create path between start and end (requires environment already generated)
+
+
+# todo: visualize path
+
+
+
 addGround(plant)
 
 # Turn off gravity
@@ -225,6 +236,7 @@ addGround(plant)
 
 plant.Finalize()
 assert plant.geometry_source_is_registered()
+
 
 trunk_source_id, trunk_frame_ids = addTrunkGeometry(scene_graph)
 
