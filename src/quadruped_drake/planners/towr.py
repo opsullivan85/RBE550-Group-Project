@@ -70,7 +70,7 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
         duration=2.5,
     ):
         foot_positions = foot_positions or FootPositions()
-        BasicTrunkPlanner.__init__(self, trunk_geometry_frame_id, x_init=x_init, y_init=y_init)
+        BasicTrunkPlanner.__init__(self, trunk_geometry_frame_id, x_init=x_init, y_init=y_init, yaw_init=yaw_init)
 
         # Set up LCM subscriber to read optimal trajectory from TOWR
         self.lc = lcm.LCM()

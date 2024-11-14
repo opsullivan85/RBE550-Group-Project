@@ -23,15 +23,15 @@ control_method = "ID"  # ID = Inverse Dynamics (standard QP),
 
 sim_time = 1000.0 # make it long
 dt = 1e-3
-target_realtime_rate = 1.0
+target_realtime_rate = 0.25
 
 show_diagram = False
 make_plots = False
 
-x_init: float = 0.0
-y_init: float = 1.0
-theta_init: float = 0.0
-x_final: float = 2.0
+x_init: float = 1.0
+y_init: float = -1.0
+theta_init: float = 3.1415 / 2
+x_final: float = 1.0
 y_final: float = 1.0
 theta_final: float = 3.1415 / 2
 world_map_path: str = "/home/ws/src/world.sdf"
@@ -117,7 +117,8 @@ def makePlanner(planning_method, world_map_path):
     if planning_method == "basic":
         bt_planner = BasicTrunkPlanner(trunk_frame_ids,
                                        x_init=x_init,
-                                       y_init=y_init)
+                                       y_init=y_init,
+                                       yaw_init=theta_init)
         planner = builder.AddSystem(bt_planner)
         
     elif planning_method == "towr":
@@ -271,10 +272,10 @@ plant_context = diagram.GetMutableSubsystemContext(plant, diagram_context)
 
 
 q0 = PositionView(plant.GetPositions(plant_context, quad_model_id))
-q0.body_qw = 1.0
+q0.body_qw = np.cos(theta_init/2)
 q0.body_qx = 0.0
 q0.body_qy = 0.0
-q0.body_qz = 0.0
+q0.body_qz = np.cos(theta_init/2)
 q0.body_x = x_init
 q0.body_y = y_init
 q0.body_z = 0.3
