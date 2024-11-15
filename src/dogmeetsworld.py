@@ -28,17 +28,17 @@ target_realtime_rate = 0.2
 show_diagram = False
 make_plots = False
 
-x_init: float = 0
-y_init: float = 0
+x_init: float = 1.0
+y_init: float = 1.0
 z_init = 0.3
 roll_init = 0.0
 pitch_init = 0.0
 yaw_init: float = 3.1415 / 4
 #theta_init: float = 0.0
 
-x_final: float = 0.0
-y_final: float = 0.0
-yaw_final: float = 3.1415 / 4
+x_final: float = 3.0
+y_final: float = 1.0
+yaw_final: float = 3.1415 / 2
 #theta_final: float = 0.0
 world_map_path: str = "/home/ws/src/world.sdf"
 
@@ -129,13 +129,13 @@ def makePlanner(planning_method, world_map_path):
     p_nom = np.array([p_lf_w, p_rf_w, p_lh_w, p_rh_w])
     
     c_yaw, s_yaw = np.cos(yaw_init), np.sin(yaw_init)
-    R = np.array([[c_yaw, -s_yaw, 0],
-                [s_yaw, c_yaw, 0],
+    R = np.array([[c_yaw, s_yaw, 0],
+                [-s_yaw, c_yaw, 0],
                 [0, 0, 1]])
     p_nom = np.dot(p_nom, R)
 
-    p_final = p_nom + p_offs
-    print("p_final is:", p_final)
+    p_foot_pos = p_nom + p_offs
+    print("p_foot_pos is:", p_foot_pos)
     #init_foot_pos = tuple(p_final.flatten())
     #bob = namedtuple("FootPositions", field_names=_fields, defaults=init_foot_pos)        
     if planning_method == "basic":
@@ -146,7 +146,7 @@ def makePlanner(planning_method, world_map_path):
                                        roll_init=0.0,
                                        pitch_init=0.0,
                                        yaw_init=yaw_init,
-                                       foot_positions=p_final)
+                                       foot_positions=p_foot_pos)
         planner = builder.AddSystem(bt_planner)
         
     elif planning_method == "towr":
@@ -160,7 +160,7 @@ def makePlanner(planning_method, world_map_path):
                 y_final=y_final,
                 yaw_final=yaw_final,
                 world_map=world_map_path,
-                foot_positions=p_final,
+                foot_positions=p_foot_pos,
             )
         )
     else:

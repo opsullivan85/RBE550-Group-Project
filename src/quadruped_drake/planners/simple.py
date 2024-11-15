@@ -16,7 +16,7 @@ class BasicTrunkPlanner(LeafSystem):
         self.pitch_init = pitch_init
         self.yaw_init = yaw_init
         self.foot_positions = foot_positions
-        print("On initialization in simple.py:", foot_positions)
+        print("On initialization in simple.py:\n", foot_positions)
 
         # Dictionary of geometry frame ids {"trunk": trunk_frame_id, "lf": lf_foot_frame_id, ...}
         self.frame_ids = frame_ids

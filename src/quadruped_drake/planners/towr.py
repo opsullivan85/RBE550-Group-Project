@@ -2,7 +2,7 @@ from planners.simple import *
 import subprocess as sub
 import os
 from pathlib import Path
-from collections import namedtuple
+#from collections import namedtuple
 
 import lcm
 from lcm_types.trunklcm import trunk_state_t
