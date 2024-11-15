@@ -80,7 +80,7 @@ class BasicTrunkPlanner(LeafSystem):
         self.output_dict["f_cj"] = np.zeros((3,4))
 
         # Body pose
-        self.output_dict["rpy_body"] = np.array([0.0, 0.0, self.yaw_init])
+        self.output_dict["rpy_body"] = np.array([self.roll_init, self.pitch_init, self.yaw_init])
         self.output_dict["p_body"] = np.array([self.x_init, self.y_init, self.z_init])
 
         # Body velocities

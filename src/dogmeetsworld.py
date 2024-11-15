@@ -29,17 +29,15 @@ show_diagram = False
 make_plots = False
 
 x_init: float = 1.0
-y_init: float = 1.0
-z_init = 0.3
+y_init: float = -1.0
+z_init = 0.0
 roll_init = 0.0
 pitch_init = 0.0
 yaw_init: float = 3.1415 / 4
-#theta_init: float = 0.0
 
 x_final: float = 3.0
 y_final: float = 1.0
-yaw_final: float = 3.1415 / 2
-#theta_final: float = 0.0
+yaw_final: float = -3.1415 / 4
 world_map_path: str = "/home/ws/src/world.sdf"
 
 #####################################################
@@ -142,9 +140,9 @@ def makePlanner(planning_method, world_map_path):
         bt_planner = BasicTrunkPlanner(trunk_frame_ids,
                                        x_init=x_init,
                                        y_init=y_init,
-                                       z_init = 0.3,
-                                       roll_init=0.0,
-                                       pitch_init=0.0,
+                                       z_init = z_init,
+                                       roll_init=roll_init,
+                                       pitch_init=pitch_init,
                                        yaw_init=yaw_init,
                                        foot_positions=p_foot_pos)
         planner = builder.AddSystem(bt_planner)
