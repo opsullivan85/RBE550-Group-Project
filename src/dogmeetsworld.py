@@ -23,17 +23,23 @@ control_method = "ID"  # ID = Inverse Dynamics (standard QP),
 
 sim_time = 1000.0 # make it long
 dt = 1e-3
-target_realtime_rate = 0.25
+target_realtime_rate = 0.2
 
 show_diagram = False
 make_plots = False
 
-x_init: float = 1.0
-y_init: float = -1.0
-theta_init: float = 3.1415 / 2
-x_final: float = 1.0
-y_final: float = 1.0
-theta_final: float = 3.1415 / 2
+x_init: float = 0
+y_init: float = 0
+z_init = 0.3
+roll_init = 0.0
+pitch_init = 0.0
+yaw_init: float = 3.1415 / 4
+#theta_init: float = 0.0
+
+x_final: float = 0.0
+y_final: float = 0.0
+yaw_final: float = 3.1415 / 4
+#theta_final: float = 0.0
 world_map_path: str = "/home/ws/src/world.sdf"
 
 #####################################################
@@ -114,11 +120,33 @@ def addTrunkGeometry(scene_graph):
 
 def makePlanner(planning_method, world_map_path):
     # high-level trunk-model planner
+     # Foot positions        
+    p_lf_w = np.array([0.175, 0.11, 0.0])
+    p_rf_w = np.array([0.175, -0.11, 0.0])
+    p_lh_w = np.array([-0.2, 0.11, 0.0])
+    p_rh_w = np.array([-0.2, -0.11, 0.0])
+    p_offs = np.array([x_init, y_init, 0.0])
+    p_nom = np.array([p_lf_w, p_rf_w, p_lh_w, p_rh_w])
+    
+    c_yaw, s_yaw = np.cos(yaw_init), np.sin(yaw_init)
+    R = np.array([[c_yaw, -s_yaw, 0],
+                [s_yaw, c_yaw, 0],
+                [0, 0, 1]])
+    p_nom = np.dot(p_nom, R)
+
+    p_final = p_nom + p_offs
+    print("p_final is:", p_final)
+    #init_foot_pos = tuple(p_final.flatten())
+    #bob = namedtuple("FootPositions", field_names=_fields, defaults=init_foot_pos)        
     if planning_method == "basic":
         bt_planner = BasicTrunkPlanner(trunk_frame_ids,
                                        x_init=x_init,
                                        y_init=y_init,
-                                       yaw_init=theta_init)
+                                       z_init = 0.3,
+                                       roll_init=0.0,
+                                       pitch_init=0.0,
+                                       yaw_init=yaw_init,
+                                       foot_positions=p_final)
         planner = builder.AddSystem(bt_planner)
         
     elif planning_method == "towr":
@@ -127,11 +155,12 @@ def makePlanner(planning_method, world_map_path):
                 trunk_frame_ids,
                 x_init=x_init,
                 y_init=y_init,
-                yaw_init=theta_init,
+                yaw_init=yaw_init,
                 x_final=x_final,
                 y_final=y_final,
-                yaw_final=theta_final,
+                yaw_final=yaw_final,
                 world_map=world_map_path,
+                foot_positions=p_final,
             )
         )
     else:
@@ -270,15 +299,22 @@ PositionView = namedview(
     )
 plant_context = diagram.GetMutableSubsystemContext(plant, diagram_context)
 
+c_yi, s_yi = np.cos(yaw_init/2), np.sin(yaw_init/2)
+c_pi, s_pi = np.cos(pitch_init/2), np.sin(pitch_init/2)
+c_ri, s_ri = np.cos(roll_init/2), np.sin(roll_init/2)
+qxi = (s_ri * c_pi * c_yi) - (c_ri * s_pi * s_yi)
+qyi = (c_ri * s_pi * c_yi) + (s_ri * c_pi * s_yi)
+qzi = (c_ri * c_pi * s_yi) - (s_ri * s_pi * c_yi)
+qwi = (c_ri * c_pi * c_yi) + (s_ri * s_pi * s_yi)
 
 q0 = PositionView(plant.GetPositions(plant_context, quad_model_id))
-q0.body_qw = np.cos(theta_init/2)
-q0.body_qx = 0.0
-q0.body_qy = 0.0
-q0.body_qz = np.cos(theta_init/2)
+q0.body_qw = qwi
+q0.body_qx = qxi
+q0.body_qy = qyi
+q0.body_qz = qzi
 q0.body_x = x_init
 q0.body_y = y_init
-q0.body_z = 0.3
+q0.body_z = z_init
 q0.torso_to_abduct_fl_j = 0.0
 q0.abduct_fl_to_thigh_fl_j = -0.8
 q0.thigh_fl_to_knee_fl_j = 1.6
