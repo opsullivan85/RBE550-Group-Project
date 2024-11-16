@@ -13,7 +13,7 @@ from control import Control
 from camera import Camera
 from simulation import SimAgent, SimObject
 from states import Position
-from util import transform_2d, unit_vectors_2d
+from util import angular_difference, transform_2d, unit_vectors_2d
 
 
 @dataclass(frozen=True)
@@ -70,21 +70,21 @@ class HoloQuad(SimAgent):
         state (Position): State
     """
 
-    height: float
-    """Height of robot (y direction)"""
+    length: float
+    """Length of robot (x direction)"""
     width: float
-    """Width of robot (x direction)"""
+    """Width of robot (y direction)"""
     color: tuple[int, int, int, int] | tuple[int, int, int] = (255, 255, 255)
     """Color of rectangle. Defaults to Black"""
     state: HoloQuadState = HoloQuadState()
     """State"""
     _previous_control: Optional[HoloQuadControl] = None
     """Most recently applied control input. None implies no previous control input"""
-    max_linear_acceleration: float = 1
+    max_linear_acceleration: float = 0.5
     """The maximum linear acceleration. Symetric acceleration and deceleration is assumed. units/s^2"""
     max_angular_acceleration: float = 0.2
     """The maximum angular acceleration. Symetric acceleration and deceleration is assumed. rad/2^2"""
-    max_v: float = 1
+    max_v: float = 0.5
     """The maximum linear velocity. units/s"""
     max_omega: float = 0.2
     """The maximum angular velocity. rad/2^2"""
@@ -92,11 +92,11 @@ class HoloQuad(SimAgent):
     @cached_property
     def collision_polygons(self) -> list[shapely.geometry.Polygon]:
         verts = [
-            [self.width / 2, self.height / 2, 1],
-            [-self.width / 2, self.height / 2, 1],
-            [-self.width / 2, -self.height / 2, 1],
-            [self.width / 2, -self.height / 2, 1],
-            [self.width / 2, self.height / 2, 1],
+            [self.length / 2, self.width / 2, 1],
+            [-self.length / 2, self.width / 2, 1],
+            [-self.length / 2, -self.width / 2, 1],
+            [self.length / 2, -self.width / 2, 1],
+            [self.length / 2, self.width / 2, 1],
         ]
         transformed_verts = transform_2d(
             verts=verts,
@@ -113,16 +113,16 @@ class HoloQuad(SimAgent):
             x=self.state.x,
             y=self.state.y,
             width=self.width,
-            height=self.height,
+            height=self.length,
             color=self.color,
             batch=batch,
         )
         sprite.anchor_position = (
             self.width / 2,
-            self.height / 2,
+            self.length / 2,
         )
         # for some reason this uses degrees and goes clockwise
-        sprite.rotation = -math.degrees(self.state.theta)
+        sprite.rotation = -math.degrees(self.state.theta) + 90
         return [sprite]
 
     def simulate(
@@ -191,9 +191,9 @@ class HoloQuad(SimAgent):
         )
 
         # encourage the agent to align with the target angle when close
-        theta_contribution = abs(self.state.theta - target_state.theta) / (
-            distance + 0.2
-        )
+        theta_contribution = angular_difference(
+            self.state.theta, target_state.theta
+        ) / (distance + 1)
 
         # discourage turning
         lazy_turning = self._previous_control.angular_acceleration
@@ -203,14 +203,21 @@ class HoloQuad(SimAgent):
             self._previous_control.x_acceleration, self._previous_control.y_acceleration
         )
 
+        velocity_vector = np.asarray([self.state.x_velocity, self.state.y_velocity])
+        heading_vector = np.asarray(
+            [np.cos(self.state.theta), np.sin(self.state.theta)]
+        )
+        straight_motion = np.dot(velocity_vector, heading_vector)
+
         heuristic = sum(
             (
-                distance * 10,
-                velocity_contribution * 2,
-                theta_contribution * 10,
-                search_depth * 0.1,
-                lazy_turning * 0.1,
-                lazy_acceleration * 0.1,
+                distance * 1,
+                velocity_contribution * 1,
+                theta_contribution * 0.1,
+                search_depth * 0.01,
+                lazy_turning * 0,
+                lazy_acceleration * 0,
+                straight_motion * (-0.05),
             )
         )
 
@@ -259,9 +266,10 @@ class HoloQuad(SimAgent):
 
 if __name__ == "__main__":
     from a_star import a_star
+    from visualization import view_collision_geometry
 
     agent = HoloQuad(2, 1)
-    target_state = HoloQuadState(x=5, y=3)
+    target_state = HoloQuadState(x=7, y=3, theta=np.pi / 2)
     state_space_bin_sizes = {
         "x_velocity": 0.1,
         "y_velocity": 0.1,
@@ -270,10 +278,13 @@ if __name__ == "__main__":
         "y": 0.1,
         "theta": 0.05,
     }
+    # view_collision_geometry([agent], show=True, camera=Camera(-10, -10, 30))
     a_star(
         agent=agent,
         static_objects=[],
         target_state=target_state,
         dt=0.1,
         state_space_bin_sizes=state_space_bin_sizes,
+        visualize=5,
+        camera=Camera(-10, -10, 30),
     )

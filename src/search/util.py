@@ -118,3 +118,8 @@ def unit_vectors_2d(n: int, theta: float = 0) -> np.ndarray:
     # Rotate each unit vector
     rotated_vectors = unit_vectors @ rotation_matrix.T
     return rotated_vectors
+
+def angular_difference(theta1, theta2):
+    """Calculate the smallest angular difference between two angles in radians."""
+    diff = (theta1 - theta2) % (2 * math.pi)
+    return min(diff, 2 * math.pi - diff)
