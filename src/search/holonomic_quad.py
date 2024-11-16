@@ -87,8 +87,8 @@ class HoloQuad(SimAgent):
     """The maximum angular acceleration. Symetric acceleration and deceleration is assumed. rad/2^2"""
     max_v: float = 0.5
     """The maximum linear velocity. units/s"""
-    max_omega: float = 0.2
-    """The maximum angular velocity. rad/2^2"""
+    max_omega: float = 0.5
+    """The maximum angular velocity. rad/s"""
 
     @cached_property
     def collision_polygons(self) -> list[shapely.geometry.Polygon]:
@@ -204,7 +204,7 @@ class HoloQuad(SimAgent):
         # encourage the agent to align with the target angle when close
         theta_contribution = angular_difference(
             self.state.theta, target_state.theta
-        ) / (distance + 1)
+        ) / (distance + 0.5)
 
         # discourage turning
         lazy_turning = self._previous_control.angular_acceleration
@@ -219,18 +219,18 @@ class HoloQuad(SimAgent):
         heading_vector = np.asarray(
             [np.cos(self.state.theta), np.sin(self.state.theta)]
         )
-        straight_motion = np.dot(velocity_vector, heading_vector)
+        straight_motion = -abs(np.dot(velocity_vector, heading_vector))
 
         heuristic = sum(
             (
                 distance * 1,
                 velocity_contribution * 1,
                 theta_contribution * 0.1,
-                search_depth * 0.01,
+                search_depth * 0.002,
                 lazy_turning * 0,
                 lazy_acceleration * 0,
-                straight_motion * (-0.05),
-                height * (10),
+                straight_motion * 0.1,
+                height * 10,
             )
         )
 

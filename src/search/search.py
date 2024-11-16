@@ -3,15 +3,17 @@ This file contains the main interface for the search module.
 """
 
 import numpy as np
-from holonomic_quad import HoloQuadState
+from holonomic_quad import HoloQuadState, HoloQuad
+from heightmap import HeightMap
 from states import Position
-from dataclasses import dataclass
+import dataclasses
+from a_star import SearchException, a_star
 
 
-@dataclass
+@dataclasses.dataclass
 class SearchResult:
     sucess: bool
-    result: list[HoloQuadState] | None
+    result: list[HoloQuadState] | None = None
 
 
 example_search_output = SearchResult(
@@ -39,6 +41,7 @@ def search(
     initial_state: Position,
     final_state: Position,
     dt: float,
+    **kwargs,
 ) -> SearchResult:
     """High level interface for searching through the world
 
@@ -54,9 +57,79 @@ def search(
         initial_state (Position): Initial state in world space.
         final_state (Position): Final state in world space
         dt (float): dt.
+        **kwargs (any): passed to a_star
 
     Returns:
         SearchResult: Boolean indicating sucess, and
             a list of states leading to the solution (assuming sucess)
     """
-    raise NotImplementedError()
+    state_space_bin_sizes = {
+        "x_velocity": 0.2,
+        "y_velocity": 0.2,
+        "omega": 0.05,
+        "x": 0.3,
+        "y": 0.3,
+        "theta": 0.1,
+    }
+    heightmap = HeightMap.default_from_heightmap(height_map=map, scale=map_cell_size)
+    initial_state = HoloQuadState(**dataclasses.asdict(initial_state))
+    final_state = HoloQuadState(**dataclasses.asdict(final_state))
+    search_agent = HoloQuad(length=2, width=1, state=initial_state)
+    try:
+        result: list[HoloQuad] = a_star(
+            agent=search_agent,
+            static_objects=[heightmap],
+            target_state=final_state,
+            dt=dt,
+            state_space_bin_sizes=state_space_bin_sizes,
+            **kwargs,
+        )
+    except SearchException as e:
+        return SearchResult(False)
+
+    states = [agent.state for agent in result]
+    return SearchResult(True, states)
+
+
+if __name__ == "__main__":
+    from visualization import Camera
+    from visualization import DisplayServer
+    import time
+
+    camera = Camera(-3, 0, 30)
+
+    map = np.random.rand(10, 10) - 0.5
+    # half at 0 height
+    map[map < 0] = 0
+    # 10% impassable
+    map[map > 0.40] = np.inf
+    map *= 0.1
+
+    initial_state = Position(x=2, y=2, theta=0)
+    final_state = Position(x=15, y=15, theta=np.pi / 2)
+    ret = search(
+        map=map,
+        map_cell_size=2,
+        initial_state=initial_state,
+        final_state=final_state,
+        dt=0.5,
+        # visualize=100,
+        # camera=camera,
+    )
+
+    if not ret.sucess:
+        raise Exception("Search Failed")
+
+    states = ret.result
+    heightmap = HeightMap.default_from_heightmap(height_map=map, scale=2)
+    with DisplayServer() as display_server:
+        while states:
+            dog = HoloQuad(length=2, width=1, state=states.pop(0))
+            target_dog = HoloQuad(
+                length=2,
+                width=1,
+                state=HoloQuadState(**dataclasses.asdict(final_state)),
+            )
+            display_server.set_camera(camera)
+            display_server.display([heightmap, dog, target_dog])
+            time.sleep(1 / 20)
