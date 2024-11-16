@@ -43,6 +43,8 @@ world_map_path: str = "/home/ws/src/world.sdf"
 #####################################################
 
 
+
+
 def createWorld(world_map_path):
     # create the obstacle environment and save it to a temporary file for towr to process
     grid = ob.Grid(size_x=5.0, size_y=5.0, res_m_p_cell=0.17)
@@ -232,6 +234,7 @@ def setupVisualization(builder, scene_graph, publish_period = None):
 
 quadruped_drake_path = str(Path(quadruped_drake.__file__).parent)
 
+
 # Drake only loads things relative to the drake path, so we have to do some hacking
 # to load an arbitrary file
 robot_description_path = (
@@ -250,6 +253,14 @@ plant.RegisterAsSourceForSceneGraph(scene_graph)
 quad = Parser(plant=plant).AddModelFromFile(robot_urdf, "quad")
 
 world = createWorld(world_map_path)
+
+# todo: create path between start and end (requires environment already generated)
+
+
+# todo: visualize path
+
+
+
 addGround(plant)
 
 # Turn off gravity
@@ -258,6 +269,7 @@ addGround(plant)
 
 plant.Finalize()
 assert plant.geometry_source_is_registered()
+
 
 trunk_source_id, trunk_frame_ids = addTrunkGeometry(scene_graph)
 
