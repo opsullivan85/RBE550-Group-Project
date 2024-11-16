@@ -13,6 +13,7 @@ from control import Control
 from camera import Camera
 from simulation import SimAgent, SimObject
 from states import Position
+from heightmap import HeightMap
 from util import angular_difference, transform_2d, unit_vectors_2d
 
 
@@ -164,6 +165,16 @@ class HoloQuad(SimAgent):
         search_depth: int,
         target_state: HoloQuadState,
     ) -> float:
+        # TODO: we should really have our heuristic based on the *transitions* in height
+        # not the absolute height.
+        # get current height value
+        height_maps = [other for other in others if type(other) == HeightMap]
+        assert (
+            len(height_maps) == 1
+        ), "Exactly one heightmap should be contained in `others`"
+        height_map = height_maps[0]
+        height = height_map.state.heights[*height_map.to_grid_space_safe(self.state)]
+
         # Heuristic is primarily distance
         agent_pos = np.asarray([self.state.x, self.state.y])
         target_pos = np.asarray([target_state.x, target_state.y])
@@ -203,6 +214,7 @@ class HoloQuad(SimAgent):
             self._previous_control.x_acceleration, self._previous_control.y_acceleration
         )
 
+        # encourage moving forwards and backwards
         velocity_vector = np.asarray([self.state.x_velocity, self.state.y_velocity])
         heading_vector = np.asarray(
             [np.cos(self.state.theta), np.sin(self.state.theta)]
@@ -218,6 +230,7 @@ class HoloQuad(SimAgent):
                 lazy_turning * 0,
                 lazy_acceleration * 0,
                 straight_motion * (-0.05),
+                height * (10),
             )
         )
 
@@ -262,6 +275,31 @@ class HoloQuad(SimAgent):
             )
         ]
         return controls
+
+    def is_valid(self, others: list["SimObject"]) -> bool:
+        """Checks if the state of the agent is valid.
+        default implementation is just collision check
+
+        Args:
+            others (list[SimObject]): other agents in the simulation
+
+        Returns:
+            bool: if the agent state is valid
+        """
+        # first perform efficent checks on any heightmap
+        non_map_others = []
+        for other in others:
+            if type(other) != HeightMap:
+                non_map_others.append(other)
+                continue
+
+            other: HeightMap
+            if not other.position_is_free(self.state):
+                return False
+            if other.any_intersects([self]):
+                return False
+
+        return super().is_valid(others=non_map_others)
 
 
 if __name__ == "__main__":

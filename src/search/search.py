@@ -41,14 +41,14 @@ def search(
     dt: float,
 ) -> SearchResult:
     """High level interface for searching through the world
-    
+
     Performs a search from initial_state to final_state through a map.
     The robot is defined by the HoloQuad implementation.
 
     Args:
         map (np.ndarray): 2d array of the map with height values (m).
             Map[0,0] placed at (0,0) in space, directed in +x +y.
-            `impassible` cells should have values large positive values (np.inf)
+            `impassible` cells should have +infinite value
         map_cell_size (float): size of each cell in the map (m).
             cells are assumed to be square.
         initial_state (Position): Initial state in world space.
