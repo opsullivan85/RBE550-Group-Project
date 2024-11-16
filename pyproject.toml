@@ -8,6 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.12"
 drake = "^1.33.0"
+scipy = "^1.14.1"
 
 
 [build-system]
