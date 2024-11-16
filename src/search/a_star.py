@@ -55,6 +55,8 @@ def a_star(
     """Performs A* for a single agent in a world of static objects.
     kills leaves when a collision is detected.
 
+    Raises: SearchException on a failed search
+
     Args:
         agent (SimObject): The agent to control
         static_objects (list[SimObject]): The static objects to avoid

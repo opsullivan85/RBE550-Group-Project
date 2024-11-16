@@ -13,6 +13,7 @@ from control import Control
 from camera import Camera
 from simulation import SimAgent, SimObject
 from states import Position
+from heightmap import HeightMap
 from util import angular_difference, transform_2d, unit_vectors_2d
 
 
@@ -86,8 +87,8 @@ class HoloQuad(SimAgent):
     """The maximum angular acceleration. Symetric acceleration and deceleration is assumed. rad/2^2"""
     max_v: float = 0.5
     """The maximum linear velocity. units/s"""
-    max_omega: float = 0.2
-    """The maximum angular velocity. rad/2^2"""
+    max_omega: float = 0.5
+    """The maximum angular velocity. rad/s"""
 
     @cached_property
     def collision_polygons(self) -> list[shapely.geometry.Polygon]:
@@ -164,6 +165,16 @@ class HoloQuad(SimAgent):
         search_depth: int,
         target_state: HoloQuadState,
     ) -> float:
+        # TODO: we should really have our heuristic based on the *transitions* in height
+        # not the absolute height.
+        # get current height value
+        height_maps = [other for other in others if type(other) == HeightMap]
+        assert (
+            len(height_maps) == 1
+        ), "Exactly one heightmap should be contained in `others`"
+        height_map = height_maps[0]
+        height = height_map.state.heights[*height_map.to_grid_space_safe(self.state)]
+
         # Heuristic is primarily distance
         agent_pos = np.asarray([self.state.x, self.state.y])
         target_pos = np.asarray([target_state.x, target_state.y])
@@ -193,7 +204,7 @@ class HoloQuad(SimAgent):
         # encourage the agent to align with the target angle when close
         theta_contribution = angular_difference(
             self.state.theta, target_state.theta
-        ) / (distance + 1)
+        ) / (distance + 0.5)
 
         # discourage turning
         lazy_turning = self._previous_control.angular_acceleration
@@ -203,21 +214,23 @@ class HoloQuad(SimAgent):
             self._previous_control.x_acceleration, self._previous_control.y_acceleration
         )
 
+        # encourage moving forwards and backwards
         velocity_vector = np.asarray([self.state.x_velocity, self.state.y_velocity])
         heading_vector = np.asarray(
             [np.cos(self.state.theta), np.sin(self.state.theta)]
         )
-        straight_motion = np.dot(velocity_vector, heading_vector)
+        straight_motion = -abs(np.dot(velocity_vector, heading_vector))
 
         heuristic = sum(
             (
                 distance * 1,
                 velocity_contribution * 1,
                 theta_contribution * 0.1,
-                search_depth * 0.01,
+                search_depth * 0.002,
                 lazy_turning * 0,
                 lazy_acceleration * 0,
-                straight_motion * (-0.05),
+                straight_motion * 0.1,
+                height * 10,
             )
         )
 
@@ -262,6 +275,31 @@ class HoloQuad(SimAgent):
             )
         ]
         return controls
+
+    def is_valid(self, others: list["SimObject"]) -> bool:
+        """Checks if the state of the agent is valid.
+        default implementation is just collision check
+
+        Args:
+            others (list[SimObject]): other agents in the simulation
+
+        Returns:
+            bool: if the agent state is valid
+        """
+        # first perform efficent checks on any heightmap
+        non_map_others = []
+        for other in others:
+            if type(other) != HeightMap:
+                non_map_others.append(other)
+                continue
+
+            other: HeightMap
+            if not other.position_is_free(self.state):
+                return False
+            if other.any_intersects([self]):
+                return False
+
+        return super().is_valid(others=non_map_others)
 
 
 if __name__ == "__main__":
