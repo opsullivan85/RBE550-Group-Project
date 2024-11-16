@@ -2,13 +2,14 @@ from planners.simple import *
 import subprocess as sub
 import os
 from pathlib import Path
-from collections import namedtuple
+#from collections import namedtuple
 
 import lcm
 from lcm_types.trunklcm import trunk_state_t
 
 import time
 
+'''
 _fields = (
     "fl_x",
     "fl_y",
@@ -26,6 +27,7 @@ _fields = (
 _x, _y, _z = 0.2, 0.11, 0
 _defaults = (_x, _y, _z, _x, -_y, _z, -_x, _y, _z, -_x, -_y, _z)
 FootPositions = namedtuple("FootPositions", field_names=_fields, defaults=_defaults)
+'''
 """Stores foot positions
 
 Args:
@@ -65,12 +67,21 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
         roll_final: float = 0,
         pitch_final: float = 0,
         yaw_final: float = 0,
-        foot_positions: FootPositions = None,
+        foot_positions = np.zeros((4,3)),
         world_map: str = "/home/ws/src/savedworlds/world.sdf",
         duration=2.5,
     ):
-        foot_positions = foot_positions or FootPositions()
-        BasicTrunkPlanner.__init__(self, trunk_geometry_frame_id)
+        #foot_positions = foot_positions or FootPositions()
+        BasicTrunkPlanner.__init__(self, 
+                                   trunk_geometry_frame_id, 
+                                   x_init=x_init, 
+                                   y_init=y_init, 
+                                   z_init=z_init,
+                                   roll_init=roll_init,
+                                   pitch_init=pitch_init,
+                                   yaw_init=yaw_init,
+                                   foot_positions=foot_positions)
+        print("Foot positions (towr.py):\n", foot_positions)
 
         # Set up LCM subscriber to read optimal trajectory from TOWR
         self.lc = lcm.LCM()
@@ -107,7 +118,7 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
         self.u2_max = self.ComputeMaxControlInputs()
 
         # Time to wait in a standing position before starting the motion
-        self.wait_time = 1.0
+        self.wait_time = 2.0
 
     def lcm_handler(self, channel, data):
         """
@@ -137,7 +148,7 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
         pitch_final: float,
         yaw_final: float,
         world_map: str,
-        foot_positions: FootPositions,
+        foot_positions: type(np.array([])),
         duration: float,
     ):
         """
@@ -168,18 +179,18 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
                 str(y_final),
                 str(yaw_final),
                 str(world_map),
-                str(foot_positions.fl_x),
-                str(foot_positions.fl_y),
-                str(foot_positions.fl_z),
-                str(foot_positions.fr_x),
-                str(foot_positions.fr_y),
-                str(foot_positions.fr_z),
-                str(foot_positions.bl_x),
-                str(foot_positions.bl_y),
-                str(foot_positions.bl_z),
-                str(foot_positions.br_x),
-                str(foot_positions.br_y),
-                str(foot_positions.br_z),
+                str(foot_positions[0, 0]),  #fl_x
+                str(foot_positions[0, 1]),  #fl_y
+                str(foot_positions[0, 2]),  #fl_z
+                str(foot_positions[1, 0]),  #fr_x
+                str(foot_positions[1, 1]),  #fr_y
+                str(foot_positions[1, 2]),  #fr_z
+                str(foot_positions[2, 0]),  #bl_x
+                str(foot_positions[2, 1]),  #bl_y
+                str(foot_positions[2, 2]),  #bl_z
+                str(foot_positions[3, 0]),  #br_x
+                str(foot_positions[3, 1]),  #br_y
+                str(foot_positions[3, 2]),  #br_z
                 str(z_init),
                 str(z_final),
                 str(roll_init),
@@ -190,7 +201,7 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
             ],
             env=my_env,
         )
-
+        
         # Read the result over LCM
         self.traj_finished = False  # clear out any stored data
         self.towr_timestamps = []  # from previous trunk trajectories
@@ -235,7 +246,7 @@ class TowrTrunkPlanner(BasicTrunkPlanner):
 
         else:
             # Find the timestamp in the (stored) TOWR trajectory that is closest
-            # to the curren time
+            # to the current time
             t -= self.wait_time
             closest_index = np.abs(np.array(self.towr_timestamps) - t).argmin()
             closest_towr_t = self.towr_timestamps[closest_index]

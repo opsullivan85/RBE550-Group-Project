@@ -1,2 +1,2 @@
 from planners.simple import BasicTrunkPlanner
-from planners.towr import TowrTrunkPlanner, FootPositions
+from planners.towr import TowrTrunkPlanner

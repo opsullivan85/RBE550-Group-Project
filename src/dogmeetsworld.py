@@ -11,13 +11,44 @@ import os
 import sys
 from pathlib import Path
 
+############### Common Parameters ###################
+show_trunk_model = True
+
+planning_method = "towr"  # "towr" or "basic"
+control_method = "ID"  # ID = Inverse Dynamics (standard QP),
+# B = Basic (simple joint-space PD),
+# MPTC = task-space passivity
+# PC = passivity-constrained
+# CLF = control-lyapunov-function based
+
+sim_time = 1000.0 # make it long
+dt = 1e-3
+target_realtime_rate = 0.2
+
+show_diagram = False
+make_plots = False
+
+x_init: float = 1.0
+y_init: float = -1.0
+z_init = 0.0
+roll_init = 0.0
+pitch_init = 0.0
+yaw_init: float = 3.1415 / 4
+
+x_final: float = 3.0
+y_final: float = 1.0
+yaw_final: float = -3.1415 / 4
+world_map_path: str = "/home/ws/src/world.sdf"
+
+#####################################################
+
 
 
 
 def createWorld(world_map_path):
     # create the obstacle environment and save it to a temporary file for towr to process
     grid = ob.Grid(size_x=5.0, size_y=5.0, res_m_p_cell=0.17)
-    ob.fillObstacles(grid, density=0.13)
+    ob.fillObstacles(grid, density=0.05)
     world_sdf = ob.gridToSdf(grid)
     with open(world_map_path, "w") as f:
         f.write(world_sdf)
@@ -55,7 +86,7 @@ def addTrunkGeometry(scene_graph):
     scene_graph.RegisterFrame(trunk_source_id, trunk_frame)
 
     trunk_shape = Box(0.4, 0.2, 0.1)
-    trunk_color = np.array([0.1, 0.1, 0.1, 0.4])
+    trunk_color = np.array([0.1, 0.1, 0.3, 0.4])
     X_trunk = RigidTransform()
     X_trunk.set_translation(np.array([0.0, 0.0, 0.0]))
 
@@ -74,6 +105,7 @@ def addTrunkGeometry(scene_graph):
 
         foot_shape = Sphere(0.02)
         X_foot = RigidTransform()
+        X_foot.set_translation(np.array([0.00, 0.00, 0.00]))
         foot_geometry = GeometryInstance(X_foot, foot_shape, foot)
         if show_trunk_model:
             foot_geometry.set_illustration_properties(
@@ -88,19 +120,47 @@ def addTrunkGeometry(scene_graph):
 
 def makePlanner(planning_method, world_map_path):
     # high-level trunk-model planner
+     # Foot positions        
+    p_lf_w = np.array([0.175, 0.11, 0.0])
+    p_rf_w = np.array([0.175, -0.11, 0.0])
+    p_lh_w = np.array([-0.2, 0.11, 0.0])
+    p_rh_w = np.array([-0.2, -0.11, 0.0])
+    p_offs = np.array([x_init, y_init, 0.0])
+    p_nom = np.array([p_lf_w, p_rf_w, p_lh_w, p_rh_w])
+    
+    c_yaw, s_yaw = np.cos(yaw_init), np.sin(yaw_init)
+    R = np.array([[c_yaw, s_yaw, 0],
+                [-s_yaw, c_yaw, 0],
+                [0, 0, 1]])
+    p_nom = np.dot(p_nom, R)
+
+    p_foot_pos = p_nom + p_offs
+    print("p_foot_pos is:", p_foot_pos)
+    #init_foot_pos = tuple(p_final.flatten())
+    #bob = namedtuple("FootPositions", field_names=_fields, defaults=init_foot_pos)        
     if planning_method == "basic":
-        planner = builder.AddSystem(BasicTrunkPlanner(trunk_frame_ids))
+        bt_planner = BasicTrunkPlanner(trunk_frame_ids,
+                                       x_init=x_init,
+                                       y_init=y_init,
+                                       z_init = z_init,
+                                       roll_init=roll_init,
+                                       pitch_init=pitch_init,
+                                       yaw_init=yaw_init,
+                                       foot_positions=p_foot_pos)
+        planner = builder.AddSystem(bt_planner)
+        
     elif planning_method == "towr":
         planner = builder.AddSystem(
             TowrTrunkPlanner(
                 trunk_frame_ids,
                 x_init=x_init,
                 y_init=y_init,
-                yaw_init=theta_init,
+                yaw_init=yaw_init,
                 x_final=x_final,
                 y_final=y_final,
-                yaw_final=theta_final,
-                world_map=world_map,
+                yaw_final=yaw_final,
+                world_map=world_map_path,
+                foot_positions=p_foot_pos,
             )
         )
     else:
@@ -174,33 +234,6 @@ def setupVisualization(builder, scene_graph, publish_period = None):
 
 quadruped_drake_path = str(Path(quadruped_drake.__file__).parent)
 
-############### Common Parameters ###################
-show_trunk_model = True
-
-planning_method = "basic"  # "towr" or "basic"
-control_method = "ID"  # ID = Inverse Dynamics (standard QP),
-# B = Basic (simple joint-space PD),
-# MPTC = task-space passivity
-# PC = passivity-constrained
-# CLF = control-lyapunov-function based
-
-sim_time = 1000.0 # make it long
-dt = 1e-3
-target_realtime_rate = 1.0
-
-show_diagram = False
-make_plots = False
-
-# todo: create start and end positions
-x_init: float = 0
-y_init: float = 0
-theta_init: float = 0
-x_final: float = 1.5 / 2
-y_final: float = -0.2
-theta_final: float = 3.1415 / 8
-world_map_path: str = "/home/ws/src/world.sdf"
-
-#####################################################
 
 # Drake only loads things relative to the drake path, so we have to do some hacking
 # to load an arbitrary file
@@ -276,14 +309,22 @@ PositionView = namedview(
     )
 plant_context = diagram.GetMutableSubsystemContext(plant, diagram_context)
 
+c_yi, s_yi = np.cos(yaw_init/2), np.sin(yaw_init/2)
+c_pi, s_pi = np.cos(pitch_init/2), np.sin(pitch_init/2)
+c_ri, s_ri = np.cos(roll_init/2), np.sin(roll_init/2)
+qxi = (s_ri * c_pi * c_yi) - (c_ri * s_pi * s_yi)
+qyi = (c_ri * s_pi * c_yi) + (s_ri * c_pi * s_yi)
+qzi = (c_ri * c_pi * s_yi) - (s_ri * s_pi * c_yi)
+qwi = (c_ri * c_pi * c_yi) + (s_ri * s_pi * s_yi)
+
 q0 = PositionView(plant.GetPositions(plant_context, quad_model_id))
-q0.body_qw = 1.0
-q0.body_qx = 0.0
-q0.body_qy = 0.0
-q0.body_qz = 0.0
+q0.body_qw = qwi
+q0.body_qx = qxi
+q0.body_qy = qyi
+q0.body_qz = qzi
 q0.body_x = x_init
 q0.body_y = y_init
-q0.body_z = 0.3
+q0.body_z = z_init
 q0.torso_to_abduct_fl_j = 0.0
 q0.abduct_fl_to_thigh_fl_j = -0.8
 q0.thigh_fl_to_knee_fl_j = 1.6

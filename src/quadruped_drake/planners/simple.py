@@ -7,8 +7,16 @@ class BasicTrunkPlanner(LeafSystem):
     desired positions, velocities, and accelerations for the feet, center-of-mass,
     and body frame orientation. 
     """
-    def __init__(self, frame_ids):
+    def __init__(self, frame_ids, x_init, y_init, z_init, roll_init, pitch_init, yaw_init, foot_positions):
         LeafSystem.__init__(self)
+        self.x_init = x_init
+        self.y_init = y_init
+        self.z_init = z_init
+        self.roll_init = roll_init
+        self.pitch_init = pitch_init
+        self.yaw_init = yaw_init
+        self.foot_positions = foot_positions
+        print("On initialization in simple.py:\n", foot_positions)
 
         # Dictionary of geometry frame ids {"trunk": trunk_frame_id, "lf": lf_foot_frame_id, ...}
         self.frame_ids = frame_ids
@@ -41,11 +49,13 @@ class BasicTrunkPlanner(LeafSystem):
         Set output values corresponing to simply
         standing on all four feet.
         """
-        # Foot positions
-        self.output_dict["p_lf"] = np.array([ 0.175, 0.11, 0.0])   # mini cheetah
-        self.output_dict["p_rf"] = np.array([ 0.175,-0.11, 0.0])
-        self.output_dict["p_lh"] = np.array([-0.2,   0.11, 0.0])
-        self.output_dict["p_rh"] = np.array([-0.2,  -0.11, 0.0])
+        
+        #print("FOOT POSITIONS! (simple.py)\n", self.foot_positions)
+        
+        self.output_dict["p_lf"] = np.array(self.foot_positions[0])   # mini cheetah
+        self.output_dict["p_rf"] = np.array(self.foot_positions[1])
+        self.output_dict["p_lh"] = np.array(self.foot_positions[2])
+        self.output_dict["p_rh"] = np.array(self.foot_positions[3])
         #self.output_dict["p_lf"] = np.array([ 0.34, 0.19, 0.0])    # anymal
         #self.output_dict["p_rf"] = np.array([ 0.34,-0.19, 0.0])
         #self.output_dict["p_lh"] = np.array([-0.34, 0.19, 0.0])
@@ -70,8 +80,8 @@ class BasicTrunkPlanner(LeafSystem):
         self.output_dict["f_cj"] = np.zeros((3,4))
 
         # Body pose
-        self.output_dict["rpy_body"] = np.array([0.0, 0.0, 0.0])
-        self.output_dict["p_body"] = np.array([0.0, 0.0, 0.3])
+        self.output_dict["rpy_body"] = np.array([self.roll_init, self.pitch_init, self.yaw_init])
+        self.output_dict["p_body"] = np.array([self.x_init, self.y_init, self.z_init])
 
         # Body velocities
         self.output_dict["rpyd_body"] = np.zeros(3)
