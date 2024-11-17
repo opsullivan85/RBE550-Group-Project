@@ -5,11 +5,16 @@ import quadruped_drake
 from quadruped_drake.controllers import *
 from quadruped_drake.planners import BasicTrunkPlanner, TowrTrunkPlanner, MultiTrunkPlanner
 import pydot
-import obstacles as ob
 
+import itertools
+import math
+import numpy as np
 import os
 import sys
 from pathlib import Path
+
+import obstacles as ob
+import path_vis
 
 ############### Common Parameters ###################
 show_trunk_model = True
@@ -42,6 +47,15 @@ world_map_path: str = "/home/ws/src/world.sdf"
 
 duration = 3.0
 
+# environment
+env_size_x = 5.0
+env_size_y = 5.0
+obs_density = 0.1
+res_m_p_cell = 0.17
+
+# start and goal
+start = np.array([0, 0, 45 / 180 * math.pi]) # x, y, yaw
+goal = np.array([env_size_x, env_size_y, 45 / 180 * math.pi])
 #####################################################
 
 
@@ -49,15 +63,20 @@ duration = 3.0
 
 def createWorld(world_map_path):
     # create the obstacle environment and save it to a temporary file for towr to process
-    grid = ob.Grid(size_x=5.0, size_y=5.0, res_m_p_cell=0.17)
-    ob.fillObstacles(grid, density=0.05)
+    grid = ob.Grid(size_x=env_size_x, size_y=env_size_y, res_m_p_cell=res_m_p_cell)
+    r = 1.25
+    grid.insertFreeZone(pos_x=start[0], pos_y=start[1], radius = r)
+    grid.insertFreeZone(pos_x=goal[0], pos_y=goal[1], radius = r)
+    ob.fillObstacles(grid, density=obs_density)
     world_sdf = ob.gridToSdf(grid)
     with open(world_map_path, "w") as f:
         f.write(world_sdf)
 
-    return Parser(plant, scene_graph, "world").AddModels(
+    parser = Parser(plant, scene_graph, "world");
+    parser.AddModels(
         file_contents=world_sdf, file_type="sdf"
     )
+    return parser
 
 
 def addGround(plant):
@@ -269,6 +288,24 @@ def setupVisualization(builder, scene_graph, publish_period = None):
     )
 
 
+def createManualPath():
+    # manually create a path from start to end
+    path = np.array([start,
+                     [1.25,1.4,0],
+                     [3.75,1.4,0],
+                     [3.75+0.75, 1.5+0.4,0],
+                     goal])
+
+    # fix yaw of each path point
+    for s, e in itertools.pairwise(path):
+        diff = e - s
+        s[2] = math.atan2(diff[1], diff[0])
+        # make sure the final point uses the same yaw
+        e[2] = s[2]
+
+    return path
+
+    
 
 quadruped_drake_path = str(Path(quadruped_drake.__file__).parent)
 
@@ -290,13 +327,12 @@ plant = builder.AddSystem(MultibodyPlant(time_step=dt))
 plant.RegisterAsSourceForSceneGraph(scene_graph)
 quad = Parser(plant=plant).AddModelFromFile(robot_urdf, "quad")
 
-world = createWorld(world_map_path)
+world_parser = createWorld(world_map_path)
 
-# todo: create path between start and end (requires environment already generated)
-
-
-# todo: visualize path
-
+# create path and visualize
+path = createManualPath()
+path_sdf = path_vis.PathVisualizer(path).toSdf()
+world_parser.AddModelsFromString(file_contents=path_sdf, file_type="sdf")
 
 
 addGround(plant)

@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import copy
 import random as rand
@@ -16,25 +17,37 @@ class Obstacle:
     # position in units of grid cells
     pos_x_cell: int = 0
     pos_y_cell: int = 0
+    scale_m_p_cell: float = 0
     
-    def getSizeX(self, scale_m_p_cell):
+    def getSizeX(self):
         """ Convert the x direction size into in units of meters, given a scale
         of meters per grid cell.  """
-        return scale_m_p_cell * self.size_x_cell
+        return self.scale_m_p_cell * self.size_x_cell
 
-    def getSizeY(self, scale_m_p_cell):
+    def getSizeY(self):
         """ Convert the y direction size into units of meters, given a scale of
         meters per grid cell.  """
-        return scale_m_p_cell * self.size_y_cell
+        return self.scale_m_p_cell * self.size_y_cell
 
     def getSizeZ(self):
         return self.size_z
     
-    def getPosX(self, scale_m_p_cell):
-        return scale_m_p_cell * self.pos_x_cell
+    def getPosX(self):
+        return self.scale_m_p_cell * self.pos_x_cell
 
-    def getPosY(self, scale_m_p_cell):
-        return scale_m_p_cell * self.pos_y_cell
+    def getPosY(self):
+        return self.scale_m_p_cell * self.pos_y_cell
+
+    def getCornerPts(self) -> list(tuple()):
+        """ Get a list of the corner points in the continuous world frame coordinates.
+        """
+        # the frame of the cell of an obstacle is at the bottom left corner
+
+        # corner points in cell units relative to the frame of the obstacle
+        corner_pts_cell = [(0,0), (0,1), (1,1), (0,1)]
+        # conver to continuous points in the world frame
+        return [(self.getPosX() + x_cell*self.scale_m_p_cell, self.getPosY() +
+                 y_cell*self.scale_m_p_cell) for x_cell, y_cell in corner_pts_cell]
 
     
 class Step(Obstacle):
@@ -54,10 +67,17 @@ class Grid:
         self._size_y_cell = round(size_y / res_m_p_cell)
         self._res_m_p_cell = res_m_p_cell
         self._obstacles = []
+        self._free_zones = []
 
         # x is in the direction of increasing rows
         # y is in the direction of increasing columns
         self._grid = np.zeros((self._size_y_cell, self._size_x_cell))
+
+    def insertFreeZone(self, pos_x, pos_y, radius):
+        """ No obstacles will be generated that overlap with a free zone, which
+        is a circle with its center located at the provided position.
+        """
+        self._free_zones.append((pos_x, pos_y, radius))
         
     def getRes(self):
         return self._res_m_p_cell
@@ -114,7 +134,8 @@ class Grid:
         return True
 
     def _overlapping(self, obstacle):
-        """ Check if any part of an obstacle will overlap with an already existing obstacle in the grid.
+        """ Check if any part of an obstacle will overlap with an already
+        existing obstacle or free space zone in the grid.
         """
         # check if any cell in the grid where the obstacle will be place is
         # already occupied
@@ -122,6 +143,15 @@ class Grid:
             for j in range(obstacle.size_y_cell):
                 if self._grid[j+obstacle.pos_y_cell, i+obstacle.pos_x_cell]:
                     return True
+
+        # check for overlap with a free zone
+        for zone in self._free_zones:
+            for p in obstacle.getCornerPts():
+                diff = np.array([zone[0], zone[1]]) - np.array(p)
+                if np.linalg.norm(diff) < zone[2]:
+                    return True
+
+
         return False
 
 
@@ -142,6 +172,7 @@ def randInsertObstacle(grid, ob_i=None):
         # choose random location for obstacle
         ob.pos_x_cell = rand.randrange(grid.getSizeXCell())
         ob.pos_y_cell = rand.randrange(grid.getSizeYCell())
+        ob.scale_m_p_cell = grid.getRes()
 
         # try place obstacle
         if grid.tryInsertObstacle(ob):
@@ -181,12 +212,14 @@ def obstacleToSdf(grid, ob, desc: str) -> str:
     :param ob The obstacle
     :param desc A unique description of the obstacle to use in parts of the SDF
     """
-    res_m_p_cell = grid.getRes()
     # By default the frame is at the center of the box, so first offset the box
     # such that the frame is at the corner of the box, then include the position
     # of the frame transformed from the grid frame to the world frame.
-    pose_x = ob.getSizeX(res_m_p_cell)/2+ob.getPosX(res_m_p_cell)-grid.getSizeX()/2
-    pose_y = ob.getSizeY(res_m_p_cell)/2+ob.getPosY(res_m_p_cell)-grid.getSizeY()/2
+    # pose_x = ob.getSizeX()/2+ob.getPosX()-grid.getSizeX()/2
+    # pose_y = ob.getSizeY()/2+ob.getPosY()-grid.getSizeY()/2
+    # pose_z = ob.getSizeZ()/2
+    pose_x = ob.getSizeX()/2+ob.getPosX()
+    pose_y = ob.getSizeY()/2+ob.getPosY()
     pose_z = ob.getSizeZ()/2
     return f"""
           <link name="{desc}">
@@ -194,14 +227,14 @@ def obstacleToSdf(grid, ob, desc: str) -> str:
             <collision name="collision1">
               <geometry>
                 <box>
-                  <size>{ob.getSizeX(res_m_p_cell)} {ob.getSizeY(res_m_p_cell)} {ob.getSizeZ()}</size>
+                  <size>{ob.getSizeX()} {ob.getSizeY()} {ob.getSizeZ()}</size>
                 </box>
               </geometry>
             </collision>
             <visual name="visual1">
               <geometry>
                 <box>
-                  <size>{ob.getSizeX(res_m_p_cell)} {ob.getSizeY(res_m_p_cell)} {ob.getSizeZ()}</size>
+                  <size>{ob.getSizeX()} {ob.getSizeY()} {ob.getSizeZ()}</size>
                 </box>
               </geometry>
             </visual>

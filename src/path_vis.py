@@ -4,7 +4,7 @@ import itertools
 import math
 
 class PathVisualizer:
-    def __init__(self, path: np.ndarray, line_thickness: int, sphere_radius: int):
+    def __init__(self, path: np.ndarray, line_thickness: int = 0.01, sphere_radius: int = 0.05):
         self._path = path
         self._line_thickness = line_thickness
         self._sphere_radius = sphere_radius
@@ -35,9 +35,6 @@ class PathVisualizer:
 
         link_id = kwargs.get('link_id', None)
         
-        assert pt.shape == (2,)
-
-        
         # create sphere sdf visualization strings
         material_blue = """
             <material>
@@ -47,34 +44,46 @@ class PathVisualizer:
             </material>
         """
 
-        sphere_vis = f"""
-          <visual name="sphere_vis">
+        waypoint_vis = f"""
+          <visual name="waypoint_vis">
+            <pose>0 0 0 0 {math.pi/2} {pt[2]}</pose>
             <geometry>
-              <sphere>
+              <cylinder>
                 <radius>{self._sphere_radius}</radius>
-              </sphere>
+                <length>{self._sphere_radius*3}</length>
+              </cylinder>
             </geometry>
             {material_blue}
           </visual>
         """
         if link_id is not None:
-            sphere_vis = f"""
-                <link name="link_{link_id}">
+            link_name = f'link_{link_id}'
+            waypoint_vis = f"""
+                <link name="{link_name}">
                   <pose>{pt[0]} {pt[1]} 0 0 0 0</pose>
-                  {sphere_vis}
+                  {waypoint_vis}
                 </link>
+                <joint name="fixed_joint_{link_id}" type="fixed">
+                  <parent>world</parent>
+                  <child>{link_name}</child>
+                </joint>
+
             """
-        return sphere_vis
+        return waypoint_vis
     
     def pathLineToSdf(self, start: np.ndarray, end: np.ndarray, **kwargs):
         # create a cyclinder that goes from the start point to the end point
         
         link_id = kwargs.get('link_id', None)
 
+        # only use the linear components of the start and end points
+        start_pt = start[0:2];
+        end_pt = end[0:2]
+        
         # Find the euler angles to transform a vertical cylinder to go from the
         # start to end point.
 
-        line_vec = np.append(end-start, 0) # add a zero z component
+        line_vec = np.append(end_pt-start_pt, 0) # add a zero z component
         line_len = np.linalg.norm(line_vec)
 
         # first calculate the angle-axis representation
@@ -114,14 +123,19 @@ class PathVisualizer:
         # for the start point, and a cyclinder goes from the start to the end.
 
         # create line visualization strings
-        sphere_vis = self.pathPointToSdf(start)
+        waypoint_vis = self.pathPointToSdf(start)
         line_vis = self.pathLineToSdf(start, end, link_id=id_str)
 
+        link_name = f"link_{id_str}"
         link_sdf = f"""
-        <link name="link_{id_str}">
+        <link name="{link_name}">
           <pose>{start[0]} {start[1]} 0 0 0 0</pose>
-          {sphere_vis}
+          {waypoint_vis}
           {line_vis}
         </link>
+        <joint name="fixed_joint_{id_str}" type="fixed">
+          <parent>world</parent>
+          <child>{link_name}</child>
+        </joint>
         """
         return link_sdf
