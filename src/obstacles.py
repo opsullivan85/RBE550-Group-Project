@@ -115,9 +115,14 @@ class Grid:
         self._obstacles.append(ob)
         for i in range(ob.size_x_cell):
             for j in range(ob.size_y_cell):
-                self._grid[j+ob.pos_y_cell, i+ob.pos_x_cell] = 1
+                self._grid[j+ob.pos_y_cell, i+ob.pos_x_cell] = ob.size_z
         
         return True
+
+    def toArray(self):
+        """ Return a copy of the internal obstacle grid.
+        """
+        return self._grid.copy()
     
     def getObstacles(self):
         return self._obstacles
