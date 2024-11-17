@@ -37,9 +37,6 @@ z_init = 0.3
 roll_init = 0.0
 pitch_init = 0.0
 
-x_final: float = -0.5
-y_final: float = -0.5
-yaw_final: float = 0.0
 world_sdf_path: str = "/home/ws/src/world.sdf"
 
 duration = 3.0
@@ -177,9 +174,9 @@ def makePlanner(planning_method, world_sdf_path, robot_path):
                 x_init=x_s,
                 y_init=y_s,
                 yaw_init=yaw_s,
-                x_final=x_final,
-                y_final=robot_path[1][2], # use the second point on path
-                yaw_final=yaw_final,
+                x_final=robot_path[1][0], # use the second point on path
+                y_final=robot_path[1][1], # use the second point on path
+                yaw_final=robot_path[1][2], # use the second point on path
                 world_map=world_sdf_path,
                 foot_positions=p_foot_pos,
                 duration=duration,
