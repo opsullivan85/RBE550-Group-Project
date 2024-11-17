@@ -19,7 +19,7 @@ import path_vis
 ############### Common Parameters ###################
 show_trunk_model = True
 
-planning_method = "basic"  # "powr" or "towr" or "basic"
+planning_method = "powr"  # "powr" or "towr" or "basic"
 control_method = "ID"  # ID = Inverse Dynamics (standard QP),
 # B = Basic (simple joint-space PD),
 # MPTC = task-space passivity
@@ -33,17 +33,14 @@ target_realtime_rate = 0.5
 show_diagram = False
 make_plots = False
 
-x_init: float = -0.5
-y_init: float = -0.5
 z_init = 0.3
 roll_init = 0.0
 pitch_init = 0.0
-yaw_init: float = 0.0
 
 x_final: float = -0.5
 y_final: float = -0.5
 yaw_final: float = 0.0
-world_map_path: str = "/home/ws/src/world.sdf"
+world_sdf_path: str = "/home/ws/src/world.sdf"
 
 duration = 3.0
 
@@ -70,9 +67,9 @@ def createObstacleGrid():
     ob.fillObstacles(grid, density=obs_density)
     return grid
 
-def createWorld(world_map_path, grid):
+def createWorld(world_sdf_path, grid):
     world_sdf = ob.gridToSdf(grid)
-    with open(world_map_path, "w") as f:
+    with open(world_sdf_path, "w") as f:
         f.write(world_sdf)
 
     parser = Parser(plant, scene_graph, "world");
@@ -142,34 +139,34 @@ def addTrunkGeometry(scene_graph):
     return trunk_source_id, trunk_frame_ids
 
 
-def makePlanner(planning_method, world_map_path):
+def makePlanner(planning_method, world_sdf_path, robot_path):
     # high-level trunk-model planner
-     # Foot positions        
+    x_s, y_s, yaw_s = robot_path[0]
+    
+    # Foot positions        
     p_lf_w = np.array([0.175, 0.11, 0.0])
     p_rf_w = np.array([0.175, -0.11, 0.0])
     p_lh_w = np.array([-0.2, 0.11, 0.0])
     p_rh_w = np.array([-0.2, -0.11, 0.0])
-    p_offs = np.array([x_init, y_init, 0.0])
+    p_offs = np.array([x_s, y_s, 0.0])
     p_nom = np.array([p_lf_w, p_rf_w, p_lh_w, p_rh_w])
-    
-    c_yaw, s_yaw = np.cos(yaw_init), np.sin(yaw_init)
+
+    c_yaw, s_yaw = np.cos(yaw_s), np.sin(yaw_s)
     R = np.array([[c_yaw, s_yaw, 0],
-                [-s_yaw, c_yaw, 0],
-                [0, 0, 1]])
+                  [-s_yaw, c_yaw, 0],
+                  [0, 0, 1]])
     p_nom = np.dot(p_nom, R)
 
     p_foot_pos = p_nom + p_offs
     print("p_foot_pos is:", p_foot_pos)
-    #init_foot_pos = tuple(p_final.flatten())
-    #bob = namedtuple("FootPositions", field_names=_fields, defaults=init_foot_pos)        
     if planning_method == "basic":
         bt_planner = BasicTrunkPlanner(trunk_frame_ids,
-                                       x_init=x_init,
-                                       y_init=y_init,
+                                       x_init=x_s,
+                                       y_init=y_s,
                                        z_init = z_init,
                                        roll_init=roll_init,
                                        pitch_init=pitch_init,
-                                       yaw_init=yaw_init,
+                                       yaw_init=yaw_s,
                                        foot_positions=p_foot_pos)
         planner = builder.AddSystem(bt_planner)
         
@@ -177,48 +174,26 @@ def makePlanner(planning_method, world_map_path):
         planner = builder.AddSystem(
             TowrTrunkPlanner(
                 trunk_frame_ids,
-                x_init=x_init,
-                y_init=y_init,
-                yaw_init=yaw_init,
+                x_init=x_s,
+                y_init=y_s,
+                yaw_init=yaw_s,
                 x_final=x_final,
-                y_final=y_final,
+                y_final=robot_path[1][2], # use the second point on path
                 yaw_final=yaw_final,
-                world_map=world_map_path,
+                world_map=world_sdf_path,
                 foot_positions=p_foot_pos,
                 duration=duration,
             )
         )
-    elif planning_method == "powr":
-        waypoints = [(x_init, y_init, yaw_init),
-                     (0.5, -0.5, 3.14/2),
-                     (0.5, 0.5, 3.14),
-                     (-0.5, 0.5, 3.14 * 3/2),
-                     (-0.5, -0.5, 3.14 * 2)]
-        x_s, y_s, yaw_s = waypoints[0]
-        
-        p_lf_w = np.array([0.175, 0.11, 0.0])
-        p_rf_w = np.array([0.175, -0.11, 0.0])
-        p_lh_w = np.array([-0.2, 0.11, 0.0])
-        p_rh_w = np.array([-0.2, -0.11, 0.0])
-        p_offs = np.array([x_s, y_s, 0.0])
-        p_nom = np.array([p_lf_w, p_rf_w, p_lh_w, p_rh_w])
-        
-        c_yaw, s_yaw = np.cos(yaw_s), np.sin(yaw_s)
-        R = np.array([[c_yaw, s_yaw, 0],
-                    [-s_yaw, c_yaw, 0],
-                    [0, 0, 1]])
-        p_nom = np.dot(p_nom, R)
-
-        p_foot_pos = p_nom + p_offs
-        
+    elif planning_method == "powr":       
         planner = builder.AddSystem(
             MultiTrunkPlanner(
                 trunk_frame_ids,
-                waypoints,
+                robot_path,
                 x_start = x_s,
                 y_start=y_s,
                 yaw_start=yaw_s,
-                world_map=world_map_path,
+                world_map=world_sdf_path,
                 foot_positions_start=p_foot_pos,
                 waypt_duration=duration,
             )
@@ -331,12 +306,12 @@ plant.RegisterAsSourceForSceneGraph(scene_graph)
 quad = Parser(plant=plant).AddModelFromFile(robot_urdf, "quad")
 
 grid = createObstacleGrid()
-world_parser = createWorld(world_map_path, grid)
+world_parser = createWorld(world_sdf_path, grid)
 
 # create path and visualize
-path = createManualPath()
-path_sdf = path_vis.PathVisualizer(path).toSdf()
-world_parser.AddModelsFromString(file_contents=path_sdf, file_type="sdf")
+robot_path = createManualPath()
+robot_path_sdf = path_vis.PathVisualizer(robot_path).toSdf()
+world_parser.AddModelsFromString(file_contents=robot_path_sdf, file_type="sdf")
 
 
 addGround(plant)
@@ -352,7 +327,7 @@ assert plant.geometry_source_is_registered()
 trunk_source_id, trunk_frame_ids = addTrunkGeometry(scene_graph)
 
 # Create high-level trunk-model planner and low-level whole-body controller
-planner = makePlanner(planning_method, world_map_path)
+planner = makePlanner(planning_method, world_sdf_path, robot_path)
 controller = makeController(control_method, plant, dt)
 
 connectSystems(builder, scene_graph, plant, planner, controller, trunk_source_id)
@@ -387,21 +362,22 @@ PositionView = namedview(
     )
 plant_context = diagram.GetMutableSubsystemContext(plant, diagram_context)
 
-c_yi, s_yi = np.cos(yaw_init/2), np.sin(yaw_init/2)
-c_pi, s_pi = np.cos(pitch_init/2), np.sin(pitch_init/2)
-c_ri, s_ri = np.cos(roll_init/2), np.sin(roll_init/2)
-qxi = (s_ri * c_pi * c_yi) - (c_ri * s_pi * s_yi)
-qyi = (c_ri * s_pi * c_yi) + (s_ri * c_pi * s_yi)
-qzi = (c_ri * c_pi * s_yi) - (s_ri * s_pi * c_yi)
-qwi = (c_ri * c_pi * c_yi) + (s_ri * s_pi * s_yi)
+yaw_s = robot_path[0][2]
+c_ys, s_ys = np.cos(yaw_s/2), np.sin(yaw_s/2)
+c_ps, s_ps = np.cos(pitch_init/2), np.sin(pitch_init/2)
+c_rs, s_rs = np.cos(roll_init/2), np.sin(roll_init/2)
+qxs = (s_rs * c_ps * c_ys) - (c_rs * s_ps * s_ys)
+qys = (c_rs * s_ps * c_ys) + (s_rs * c_ps * s_ys)
+qzs = (c_rs * c_ps * s_ys) - (s_rs * s_ps * c_ys)
+qws = (c_rs * c_ps * c_ys) + (s_rs * s_ps * s_ys)
 
 q0 = PositionView(plant.GetPositions(plant_context, quad_model_id))
-q0.body_qw = qwi
-q0.body_qx = qxi
-q0.body_qy = qyi
-q0.body_qz = qzi
-q0.body_x = x_init
-q0.body_y = y_init
+q0.body_qw = qws
+q0.body_qx = qxs
+q0.body_qy = qys
+q0.body_qz = qzs
+q0.body_x = robot_path[0][0]
+q0.body_y = robot_path[0][1]
 q0.body_z = z_init
 q0.torso_to_abduct_fl_j = 0.0
 q0.abduct_fl_to_thigh_fl_j = -0.8
