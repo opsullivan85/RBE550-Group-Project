@@ -19,7 +19,7 @@ import path_vis
 ############### Common Parameters ###################
 show_trunk_model = True
 
-planning_method = "powr"  # "powr" or "towr" or "basic"
+planning_method = "basic"  # "powr" or "towr" or "basic"
 control_method = "ID"  # ID = Inverse Dynamics (standard QP),
 # B = Basic (simple joint-space PD),
 # MPTC = task-space passivity
