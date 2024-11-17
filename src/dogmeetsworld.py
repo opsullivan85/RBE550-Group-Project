@@ -39,7 +39,7 @@ pitch_init = 0.0
 
 world_sdf_path: str = "/home/ws/src/world.sdf"
 
-duration = 3.0
+avg_trunk_vel = 0.6
 
 # environment
 env_size_x = 5.0
@@ -168,18 +168,26 @@ def makePlanner(planning_method, world_sdf_path, robot_path):
         planner = builder.AddSystem(bt_planner)
         
     elif planning_method == "towr":
+        # use the second point on path as the destination
+        x_f, y_f, yaw_f = robot_path[1]
+        # calculate the duration based on the average velocity and euclidian distance
+        diff = np.array([x_f, y_f])-np.array([x_s, y_s])
+        dist = np.linalg.norm(diff)
+        dur = dist / avg_trunk_vel
         planner = builder.AddSystem(
             TowrTrunkPlanner(
                 trunk_frame_ids,
                 x_init=x_s,
                 y_init=y_s,
+                z_init=z_init,
                 yaw_init=yaw_s,
-                x_final=robot_path[1][0], # use the second point on path
-                y_final=robot_path[1][1], # use the second point on path
-                yaw_final=robot_path[1][2], # use the second point on path
+                x_final=x_f, 
+                y_final=y_f,
+                z_final=z_init,
+                yaw_final=yaw_f,
                 world_map=world_sdf_path,
                 foot_positions=p_foot_pos,
-                duration=duration,
+                duration=dur,
             )
         )
     elif planning_method == "powr":       
@@ -187,12 +195,12 @@ def makePlanner(planning_method, world_sdf_path, robot_path):
             MultiTrunkPlanner(
                 trunk_frame_ids,
                 robot_path,
+                avg_trunk_vel=avg_trunk_vel,
                 x_start = x_s,
                 y_start=y_s,
                 yaw_start=yaw_s,
                 world_map=world_sdf_path,
                 foot_positions_start=p_foot_pos,
-                waypt_duration=duration,
             )
         )
     else:
