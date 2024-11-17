@@ -5,6 +5,7 @@ from pathlib import Path
 
 import lcm
 from lcm_types.trunklcm import trunk_state_t
+import itertools
 
 
 class MultiTrunkPlanner(BasicTrunkPlanner):
@@ -17,6 +18,7 @@ class MultiTrunkPlanner(BasicTrunkPlanner):
         self,
         trunk_geometry_frame_id,
         waypoints,
+        avg_trunk_vel,
         x_start: float = 0,
         y_start: float = 0,
         z_start: float = 0.3,
@@ -25,7 +27,6 @@ class MultiTrunkPlanner(BasicTrunkPlanner):
         yaw_start: float = 0,
         foot_positions_start = np.zeros((4,3)),
         world_map: str = "/home/ws/src/savedworlds/world.sdf",
-        waypt_duration=1.0,
     ):
 
         #foot_positions = foot_positions or FootPositions()
@@ -59,7 +60,7 @@ class MultiTrunkPlanner(BasicTrunkPlanner):
         self.global_timestamps = []
 
         # Call TOWR repeatedly to generate a nominal trunk trajectory
-        self.multijectory(waypoints=waypoints, duration=waypt_duration)
+        self.multijectory(waypoints=waypoints, avg_trunk_vel=avg_trunk_vel)
         print("Hooo-yah!")
 
 
@@ -155,7 +156,7 @@ class MultiTrunkPlanner(BasicTrunkPlanner):
         
         proc.kill()
 
-    def multijectory(self, waypoints, duration):
+    def multijectory(self, waypoints, avg_trunk_vel):
         #Initialization for global start pose
         x_trunk_prev = self.x_init
         y_trunk_prev = self.y_init
@@ -167,11 +168,16 @@ class MultiTrunkPlanner(BasicTrunkPlanner):
         t_prev = 0.0
         
         j = 0
-        for w in waypoints:
+        for _, w in itertools.pairwise(waypoints):
             print("COMPUTING WAYPOINT #", j)
             j+=1
             x_target, y_target, theta_target = w    # Just using tuples for now
             
+            # calculate the duration based on the average velocity and euclidian distance
+            diff = np.array([x_target, y_target])-np.array([x_trunk_prev, y_trunk_prev])
+            dist = np.linalg.norm(diff)
+            dur = dist / avg_trunk_vel
+
             self.GenerateTrunkTrajectory(
                 x_init=x_trunk_prev,
                 y_init=y_trunk_prev,
@@ -187,7 +193,7 @@ class MultiTrunkPlanner(BasicTrunkPlanner):
                 yaw_final=theta_target,
                 world_map=self.worldmap,
                 foot_positions=foot_pos_prev,
-                duration=duration,
+                duration=dur,
             )
             
             #Pick off final trunk state for trunk x, y, z, roll, pitch, yaw, and foot positions
