@@ -61,13 +61,16 @@ goal = np.array([env_size_x, env_size_y, 45 / 180 * math.pi])
 
 
 
-def createWorld(world_map_path):
+def createObstacleGrid():
     # create the obstacle environment and save it to a temporary file for towr to process
     grid = ob.Grid(size_x=env_size_x, size_y=env_size_y, res_m_p_cell=res_m_p_cell)
     r = 1.25
     grid.insertFreeZone(pos_x=start[0], pos_y=start[1], radius = r)
     grid.insertFreeZone(pos_x=goal[0], pos_y=goal[1], radius = r)
     ob.fillObstacles(grid, density=obs_density)
+    return grid
+
+def createWorld(world_map_path, grid):
     world_sdf = ob.gridToSdf(grid)
     with open(world_map_path, "w") as f:
         f.write(world_sdf)
@@ -327,7 +330,8 @@ plant = builder.AddSystem(MultibodyPlant(time_step=dt))
 plant.RegisterAsSourceForSceneGraph(scene_graph)
 quad = Parser(plant=plant).AddModelFromFile(robot_urdf, "quad")
 
-world_parser = createWorld(world_map_path)
+grid = createObstacleGrid()
+world_parser = createWorld(world_map_path, grid)
 
 # create path and visualize
 path = createManualPath()

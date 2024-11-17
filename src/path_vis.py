@@ -91,7 +91,7 @@ class PathVisualizer:
         u_z = np.array([0,0,1])
         rot_axis = np.cross(u_z, u_line)
         norm_cross = np.linalg.norm(rot_axis);
-        angle = math.atan(norm_cross / np.dot(u_z, u_line))
+        angle = math.atan2(norm_cross, np.dot(u_z, u_line))
 
         # extrinsic rotations about x, y, z (in this order)
         euler = R.from_rotvec(angle * rot_axis).as_euler('xyz')
