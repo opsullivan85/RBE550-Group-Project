@@ -3,7 +3,7 @@
 from pydrake.all import *
 import quadruped_drake
 from quadruped_drake.controllers import *
-from quadruped_drake.planners import BasicTrunkPlanner, TowrTrunkPlanner
+from quadruped_drake.planners import BasicTrunkPlanner, TowrTrunkPlanner, MultiTrunkPlanner
 import pydot
 import obstacles as ob
 
@@ -14,7 +14,7 @@ from pathlib import Path
 ############### Common Parameters ###################
 show_trunk_model = True
 
-planning_method = "towr"  # "towr" or "basic"
+planning_method = "powr"  # "powr" or "towr" or "basic"
 control_method = "ID"  # ID = Inverse Dynamics (standard QP),
 # B = Basic (simple joint-space PD),
 # MPTC = task-space passivity
@@ -23,22 +23,24 @@ control_method = "ID"  # ID = Inverse Dynamics (standard QP),
 
 sim_time = 1000.0 # make it long
 dt = 1e-3
-target_realtime_rate = 0.2
+target_realtime_rate = 0.5
 
 show_diagram = False
 make_plots = False
 
-x_init: float = 1.0
-y_init: float = -1.0
-z_init = 0.0
+x_init: float = -0.5
+y_init: float = -0.5
+z_init = 0.3
 roll_init = 0.0
 pitch_init = 0.0
-yaw_init: float = 3.1415 / 4
+yaw_init: float = 0.0
 
-x_final: float = 3.0
-y_final: float = 1.0
-yaw_final: float = -3.1415 / 4
+x_final: float = -0.5
+y_final: float = -0.5
+yaw_final: float = 0.0
 world_map_path: str = "/home/ws/src/world.sdf"
+
+duration = 3.0
 
 #####################################################
 
@@ -61,8 +63,8 @@ def createWorld(world_map_path):
 def addGround(plant):
     # Add a flat ground with friction
     X_BG = RigidTransform()
-    X_BG.set_translation(np.array([0.0, 0.0, -0.01]))  # Offset halfspace ground for now
-    surface_friction = CoulombFriction(static_friction=0.7, dynamic_friction=0.7)
+    X_BG.set_translation(np.array([0.0, 0.0, -0.005]))  # Offset halfspace ground for now
+    surface_friction = CoulombFriction(static_friction=1.0, dynamic_friction=1.0)
     plant.RegisterCollisionGeometry(
         plant.world_body(),  # the body for which this object is registered
         X_BG,  # The fixed pose of the geometry frame G in the body frame B
@@ -161,6 +163,42 @@ def makePlanner(planning_method, world_map_path):
                 yaw_final=yaw_final,
                 world_map=world_map_path,
                 foot_positions=p_foot_pos,
+                duration=duration,
+            )
+        )
+    elif planning_method == "powr":
+        waypoints = [(x_init, y_init, yaw_init),
+                     (0.5, -0.5, 3.14/2),
+                     (0.5, 0.5, 3.14),
+                     (-0.5, 0.5, 3.14 * 3/2),
+                     (-0.5, -0.5, 3.14 * 2)]
+        x_s, y_s, yaw_s = waypoints[0]
+        
+        p_lf_w = np.array([0.175, 0.11, 0.0])
+        p_rf_w = np.array([0.175, -0.11, 0.0])
+        p_lh_w = np.array([-0.2, 0.11, 0.0])
+        p_rh_w = np.array([-0.2, -0.11, 0.0])
+        p_offs = np.array([x_s, y_s, 0.0])
+        p_nom = np.array([p_lf_w, p_rf_w, p_lh_w, p_rh_w])
+        
+        c_yaw, s_yaw = np.cos(yaw_s), np.sin(yaw_s)
+        R = np.array([[c_yaw, s_yaw, 0],
+                    [-s_yaw, c_yaw, 0],
+                    [0, 0, 1]])
+        p_nom = np.dot(p_nom, R)
+
+        p_foot_pos = p_nom + p_offs
+        
+        planner = builder.AddSystem(
+            MultiTrunkPlanner(
+                trunk_frame_ids,
+                waypoints,
+                x_start = x_s,
+                y_start=y_s,
+                yaw_start=yaw_s,
+                world_map=world_map_path,
+                foot_positions_start=p_foot_pos,
+                waypt_duration=duration,
             )
         )
     else:
