@@ -56,10 +56,6 @@ class BasicTrunkPlanner(LeafSystem):
         self.output_dict["p_rf"] = np.array(self.foot_positions[1])
         self.output_dict["p_lh"] = np.array(self.foot_positions[2])
         self.output_dict["p_rh"] = np.array(self.foot_positions[3])
-        #self.output_dict["p_lf"] = np.array([ 0.34, 0.19, 0.0])    # anymal
-        #self.output_dict["p_rf"] = np.array([ 0.34,-0.19, 0.0])
-        #self.output_dict["p_lh"] = np.array([-0.34, 0.19, 0.0])
-        #self.output_dict["p_rh"] = np.array([-0.34,-0.19, 0.0])
 
         # Foot velocities
         self.output_dict["pd_lf"] = np.zeros(3)
