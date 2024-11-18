@@ -13,6 +13,7 @@ from a_star import SearchException, a_star
 @dataclasses.dataclass
 class SearchResult:
     sucess: bool
+    failure_msg: str | None = None
     result: list[HoloQuadState] | None = None
 
 
@@ -85,10 +86,10 @@ def search(
             **kwargs,
         )
     except SearchException as e:
-        return SearchResult(False)
+        return SearchResult(False, failure_msg=str(e))
 
     states = [agent.state for agent in result]
-    return SearchResult(True, states)
+    return SearchResult(True, result=states)
 
 
 if __name__ == "__main__":

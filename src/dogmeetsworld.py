@@ -3,8 +3,14 @@
 from pydrake.all import *
 import quadruped_drake
 from quadruped_drake.controllers import *
-from quadruped_drake.planners import BasicTrunkPlanner, TowrTrunkPlanner, MultiTrunkPlanner
+from quadruped_drake.planners import (
+    BasicTrunkPlanner,
+    TowrTrunkPlanner,
+    MultiTrunkPlanner,
+)
 import pydot
+from search.search import search
+from search.states import Point
 
 import itertools
 import math
@@ -26,7 +32,7 @@ control_method = "ID"  # ID = Inverse Dynamics (standard QP),
 # PC = passivity-constrained
 # CLF = control-lyapunov-function based
 
-sim_time = 1000.0 # make it long
+sim_time = 1000.0  # make it long
 dt = 1e-3
 target_realtime_rate = 0.5
 
@@ -48,38 +54,37 @@ obs_density = 0.1
 res_m_p_cell = 0.17
 
 # start and goal
-start = np.array([0, 0, 45 / 180 * math.pi]) # x, y, yaw
+start = np.array([0, 0, 45 / 180 * math.pi])  # x, y, yaw
 goal = np.array([env_size_x, env_size_y, 45 / 180 * math.pi])
 #####################################################
-
-
 
 
 def createObstacleGrid():
     # create the obstacle environment and save it to a temporary file for towr to process
     grid = ob.Grid(size_x=env_size_x, size_y=env_size_y, res_m_p_cell=res_m_p_cell)
     r = 1.25
-    grid.insertFreeZone(pos_x=start[0], pos_y=start[1], radius = r)
-    grid.insertFreeZone(pos_x=goal[0], pos_y=goal[1], radius = r)
+    grid.insertFreeZone(pos_x=start[0], pos_y=start[1], radius=r)
+    grid.insertFreeZone(pos_x=goal[0], pos_y=goal[1], radius=r)
     ob.fillObstacles(grid, density=obs_density)
     return grid
+
 
 def createWorld(world_sdf_path, grid):
     world_sdf = ob.gridToSdf(grid)
     with open(world_sdf_path, "w") as f:
         f.write(world_sdf)
 
-    parser = Parser(plant, scene_graph, "world");
-    parser.AddModels(
-        file_contents=world_sdf, file_type="sdf"
-    )
+    parser = Parser(plant, scene_graph, "world")
+    parser.AddModels(file_contents=world_sdf, file_type="sdf")
     return parser
 
 
 def addGround(plant):
     # Add a flat ground with friction
     X_BG = RigidTransform()
-    X_BG.set_translation(np.array([0.0, 0.0, -0.005]))  # Offset halfspace ground for now
+    X_BG.set_translation(
+        np.array([0.0, 0.0, -0.005])
+    )  # Offset halfspace ground for now
     surface_friction = CoulombFriction(static_friction=1.0, dynamic_friction=1.0)
     plant.RegisterCollisionGeometry(
         plant.world_body(),  # the body for which this object is registered
@@ -139,8 +144,8 @@ def addTrunkGeometry(scene_graph):
 def makePlanner(planning_method, world_sdf_path, robot_path):
     # high-level trunk-model planner
     x_s, y_s, yaw_s = robot_path[0]
-    
-    # Foot positions        
+
+    # Foot positions
     p_lf_w = np.array([0.175, 0.11, 0.0])
     p_rf_w = np.array([0.175, -0.11, 0.0])
     p_lh_w = np.array([-0.2, 0.11, 0.0])
@@ -149,29 +154,29 @@ def makePlanner(planning_method, world_sdf_path, robot_path):
     p_nom = np.array([p_lf_w, p_rf_w, p_lh_w, p_rh_w])
 
     c_yaw, s_yaw = np.cos(yaw_s), np.sin(yaw_s)
-    R = np.array([[c_yaw, s_yaw, 0],
-                  [-s_yaw, c_yaw, 0],
-                  [0, 0, 1]])
+    R = np.array([[c_yaw, s_yaw, 0], [-s_yaw, c_yaw, 0], [0, 0, 1]])
     p_nom = np.dot(p_nom, R)
 
     p_foot_pos = p_nom + p_offs
     print("p_foot_pos is:", p_foot_pos)
     if planning_method == "basic":
-        bt_planner = BasicTrunkPlanner(trunk_frame_ids,
-                                       x_init=x_s,
-                                       y_init=y_s,
-                                       z_init = z_init,
-                                       roll_init=roll_init,
-                                       pitch_init=pitch_init,
-                                       yaw_init=yaw_s,
-                                       foot_positions=p_foot_pos)
+        bt_planner = BasicTrunkPlanner(
+            trunk_frame_ids,
+            x_init=x_s,
+            y_init=y_s,
+            z_init=z_init,
+            roll_init=roll_init,
+            pitch_init=pitch_init,
+            yaw_init=yaw_s,
+            foot_positions=p_foot_pos,
+        )
         planner = builder.AddSystem(bt_planner)
-        
+
     elif planning_method == "towr":
         # use the second point on path as the destination
         x_f, y_f, yaw_f = robot_path[1]
         # calculate the duration based on the average velocity and euclidian distance
-        diff = np.array([x_f, y_f])-np.array([x_s, y_s])
+        diff = np.array([x_f, y_f]) - np.array([x_s, y_s])
         dist = np.linalg.norm(diff)
         dur = dist / avg_trunk_vel
         planner = builder.AddSystem(
@@ -181,7 +186,7 @@ def makePlanner(planning_method, world_sdf_path, robot_path):
                 y_init=y_s,
                 z_init=z_init,
                 yaw_init=yaw_s,
-                x_final=x_f, 
+                x_final=x_f,
                 y_final=y_f,
                 z_final=z_init,
                 yaw_final=yaw_f,
@@ -190,13 +195,13 @@ def makePlanner(planning_method, world_sdf_path, robot_path):
                 duration=dur,
             )
         )
-    elif planning_method == "powr":       
+    elif planning_method == "powr":
         planner = builder.AddSystem(
             MultiTrunkPlanner(
                 trunk_frame_ids,
                 robot_path,
                 avg_trunk_vel=avg_trunk_vel,
-                x_start = x_s,
+                x_start=x_s,
                 y_start=y_s,
                 yaw_start=yaw_s,
                 world_map=world_sdf_path,
@@ -226,7 +231,7 @@ def makeController(control_method, plant, dt):
         sys.exit(1)
     return controller
 
-    
+
 def connectSystems(builder, scene_graph, plant, planner, controller, trunk_source_id):
     # Set up the Scene Graph
     builder.Connect(
@@ -251,33 +256,29 @@ def connectSystems(builder, scene_graph, plant, planner, controller, trunk_sourc
     builder.Connect(
         controller.GetOutputPort("quad_torques"), plant.get_actuation_input_port(quad)
     )
-    builder.Connect(plant.get_state_output_port(), controller.GetInputPort("quad_state"))
+    builder.Connect(
+        plant.get_state_output_port(), controller.GetInputPort("quad_state")
+    )
 
 
-def setupVisualization(builder, scene_graph, publish_period = None):
+def setupVisualization(builder, scene_graph, publish_period=None):
     # Only provide a publish period if necessary because it can slow things down
     # if it has a very low value. Originally it was set to the dt value of the
     # simulation which probably isn't necessary.
 
-    #Set up the Meshcat Visualizer
+    # Set up the Meshcat Visualizer
     meshcat = StartMeshcat()
     meshcat_params = MeshcatVisualizerParams()
     if publish_period != None:
         meshcat_params.publish_period = dt  # Set the publishing rate
 
     # Add the visualizer to the builder
-    MeshcatVisualizer.AddToBuilder(
-        builder, scene_graph, meshcat, meshcat_params
-    )
+    MeshcatVisualizer.AddToBuilder(builder, scene_graph, meshcat, meshcat_params)
 
-
-def createManualPath():
     # manually create a path from start to end
-    path = np.array([start,
-                     [1.25,1.4,0],
-                     [3.75,1.4,0],
-                     [3.75+0.75, 1.5+0.4,0],
-                     goal])
+    path = np.array(
+        [start, [1.25, 1.4, 0], [3.75, 1.4, 0], [3.75 + 0.75, 1.5 + 0.4, 0], goal]
+    )
 
     # fix yaw of each path point
     for s, e in itertools.pairwise(path):
@@ -288,7 +289,6 @@ def createManualPath():
 
     return path
 
-    
 
 quadruped_drake_path = str(Path(quadruped_drake.__file__).parent)
 
@@ -314,7 +314,26 @@ grid = createObstacleGrid()
 world_parser = createWorld(world_sdf_path, grid)
 
 # create path and visualize
-robot_path = createManualPath()
+# robot_path = createManualPath()
+
+a_star_path = search(
+    map=grid.toArray(),
+    map_cell_size=res_m_p_cell,
+    initial_state=Point(0, 0),
+    final_state=Point(4, 4),
+    dt=0.1,
+)
+if not a_star_path.sucess:
+    raise Exception(a_star_path.failure_msg)
+
+robot_path = np.asarray(
+    [[state.x, state.y, state.theta] for state in a_star_path.result][::20]
+)
+print("---------------------------------------------------")
+print(f"Number of waypoints in path: {robot_path.shape[0]}")
+print("---------------------------------------------------")
+# print(len(a_star_path.result))
+# exit()
 robot_path_sdf = path_vis.PathVisualizer(robot_path).toSdf()
 world_parser.AddModelsFromString(file_contents=robot_path_sdf, file_type="sdf")
 
@@ -360,17 +379,15 @@ simulator.set_target_realtime_rate(target_realtime_rate)
 # Set initial states
 quad_model_id = plant.GetModelInstanceByName("quad")
 PositionView = namedview(
-        "Positions",
-        plant.GetPositionNames(
-            quad_model_id, always_add_suffix=False
-        ),
-    )
+    "Positions",
+    plant.GetPositionNames(quad_model_id, always_add_suffix=False),
+)
 plant_context = diagram.GetMutableSubsystemContext(plant, diagram_context)
 
 yaw_s = robot_path[0][2]
-c_ys, s_ys = np.cos(yaw_s/2), np.sin(yaw_s/2)
-c_ps, s_ps = np.cos(pitch_init/2), np.sin(pitch_init/2)
-c_rs, s_rs = np.cos(roll_init/2), np.sin(roll_init/2)
+c_ys, s_ys = np.cos(yaw_s / 2), np.sin(yaw_s / 2)
+c_ps, s_ps = np.cos(pitch_init / 2), np.sin(pitch_init / 2)
+c_rs, s_rs = np.cos(roll_init / 2), np.sin(roll_init / 2)
 qxs = (s_rs * c_ps * c_ys) - (c_rs * s_ps * s_ys)
 qys = (c_rs * s_ps * c_ys) + (s_rs * c_ps * s_ys)
 qzs = (c_rs * c_ps * s_ys) - (s_rs * s_ps * c_ys)
@@ -402,7 +419,9 @@ qd0 = np.zeros(plant.num_velocities())
 plant.SetVelocities(plant_context, qd0)
 
 # Visualize the diagram.
-pydot.graph_from_dot_data(diagram.GetGraphvizString(max_depth=1))[0].write_svg("diagram.svg")
+pydot.graph_from_dot_data(diagram.GetGraphvizString(max_depth=1))[0].write_svg(
+    "diagram.svg"
+)
 
 # Run the simulation!
 simulator.AdvanceTo(sim_time)

@@ -3,14 +3,17 @@ import itertools
 import math
 from dataclasses import dataclass, field
 from functools import cached_property
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
-import pyglet
+from search import ENABLE_VISUALIZATION
+
+if ENABLE_VISUALIZATION:
+    import pyglet
+    from camera import Camera
 import shapely
 
 from control import Control
-from camera import Camera
 from simulation import SimAgent, SimObject
 from states import Position
 from heightmap import HeightMap
@@ -108,8 +111,8 @@ class HoloQuad(SimAgent):
         return [shapely.geometry.Polygon(transformed_verts)]
 
     def drawables(
-        self, batch: pyglet.graphics.Batch
-    ) -> list[pyglet.shapes.ShapeBase | pyglet.sprite.Sprite]:
+        self, batch: "pyglet.graphics.Batch"
+    ) -> list[Union["pyglet.shapes.ShapeBase" "pyglet.sprite.Sprite"]]:
         sprite = pyglet.shapes.Rectangle(
             x=self.state.x,
             y=self.state.y,
@@ -173,7 +176,12 @@ class HoloQuad(SimAgent):
             len(height_maps) == 1
         ), "Exactly one heightmap should be contained in `others`"
         height_map = height_maps[0]
-        height = height_map.state.heights[*height_map.to_grid_space_safe(self.state)]
+        try:
+            gs = height_map.to_grid_space_safe(self.state)
+        except IndexError as e:
+            # infinite cost for being out of bounds
+            return np.inf
+        height = height_map.state.heights[gs[0], gs[1]]
 
         # Heuristic is primarily distance
         agent_pos = np.asarray([self.state.x, self.state.y])
