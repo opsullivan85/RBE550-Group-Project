@@ -3,7 +3,7 @@
 
 // #include <towr/terrain/examples/height_map_examples.h>
 #include <towr/terrain/height_map.h>
-#include <tower/terrain/Grid.h>
+#include <towr/terrain/Grid.h>
 #include <towr/nlp_formulation.h>
 #include <ifopt/ipopt_solver.h>
 
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
     float x_final = std::stof(argv[6]);
     float y_final = std::stof(argv[7]);
     float yaw_final = std::stof(argv[8]);
-    const std::string world_sdf = std::string(argv[9]);
+    const std::string grid_csv = std::string(argv[9]);
     float fl_x = std::stof(argv[10]);
     float fl_y = std::stof(argv[11]);
     float fl_z = std::stof(argv[12]);
@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
     NlpFormulation formulation;
 
     // terrain
-    formulation.terrain_ = std::make_shared<Grid>(world_sdf);
+    formulation.terrain_ = std::make_shared<Grid>(grid_csv);
 
     // Kinematic limits and dynamic parameters
     formulation.model_ = RobotModel(RobotModel::MiniCheetah);

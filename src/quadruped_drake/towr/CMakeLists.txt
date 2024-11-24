@@ -64,7 +64,8 @@ add_library(${PROJECT_NAME} SHARED
 )
 target_link_libraries(${PROJECT_NAME} 
   PUBLIC 
-    ifopt::ifopt_core
+  ifopt::ifopt_core
+  rapidcsv::rapidcsv
 )
 target_include_directories(${PROJECT_NAME} 
   PUBLIC

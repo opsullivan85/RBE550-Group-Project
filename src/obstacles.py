@@ -80,8 +80,7 @@ class Grid:
         self._obstacles = []
         self._free_zones = []
 
-        # x is in the direction of increasing rows
-        # y is in the direction of increasing columns
+        # y is the row index and x is the column index
         self._grid = np.zeros((self._size_y_cell, self._size_x_cell))
 
     def insertFreeZone(self, pos_x, pos_y, radius):
