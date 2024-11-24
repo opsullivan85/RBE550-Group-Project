@@ -31,7 +31,8 @@ RUN pip3 install \
     scipy==1.14.1 \
     matplotlib \
     shapely \
-    pyglet
+    pyglet \
+    conan
 
 # IFOPT
 RUN mkdir repos && \

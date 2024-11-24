@@ -34,10 +34,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <map>
 #include <string>
-#include <drake/multibody/plant/multibody_plant.h>
-#include <drake/multibody/parsing/parser.h>
-#include <drake/geometry/scene_graph.h>
-#include <drake/systems/analysis/simulator.h>
 
 
 #include <Eigen/Dense>
@@ -194,18 +190,6 @@ namespace towr
           {HeightMap::SlopeID, "Slope"},
           {HeightMap::ChimneyID, "Chimney"},
           {HeightMap::ChimneyLRID, "ChimenyLR"}};
-
-  class GridSDF : public HeightMap
-  {
-  public:
-    GridSDF(std::string file_path);
-    double GetHeight(double x, double y) const override;
-
-  private:
-    // std::vector<std::vector<double>> height_map;
-    drake::multibody::MultibodyPlant<double> plant;
-    drake::multibody::ModelInstanceIndex model_instance;
-  };
 
 } /* namespace towr */
 

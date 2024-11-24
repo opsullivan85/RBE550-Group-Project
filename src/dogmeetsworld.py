@@ -26,7 +26,7 @@ import path_vis
 ############### Common Parameters ###################
 show_trunk_model = True
 
-planning_method = "powr"  # "powr" or "towr" or "basic"
+planning_method = "basic"  # "powr" or "towr" or "basic"
 control_method = "ID"  # ID = Inverse Dynamics (standard QP),
 # B = Basic (simple joint-space PD),
 # MPTC = task-space passivity
@@ -45,6 +45,7 @@ roll_init = 0.0
 pitch_init = 0.0
 
 world_sdf_path: str = "/home/ws/src/world.sdf"
+grid_csv_path: str = "/home/ws/src/grid.csv"
 
 class PathType(Enum):
     MANUAL=1
@@ -358,6 +359,8 @@ plant.RegisterAsSourceForSceneGraph(scene_graph)
 quad = Parser(plant=plant).AddModelFromFile(robot_urdf, "quad")
 
 grid = createObstacleGrid(terrain)
+# write grid array to a file for towr to consume
+np.savetxt(grid_csv_path, grid.toArray(), delimiter=',')
 world_parser = createWorld(world_sdf_path, grid)
 
 # create path and visualize

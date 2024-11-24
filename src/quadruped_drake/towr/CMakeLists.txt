@@ -3,7 +3,6 @@ project(towr VERSION 1.3.3)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 find_package(ifopt 2.0.1 REQUIRED)
-find_package(drake CONFIG REQUIRED)
 
 
 ###########
@@ -66,7 +65,6 @@ add_library(${PROJECT_NAME} SHARED
 target_link_libraries(${PROJECT_NAME} 
   PUBLIC 
     ifopt::ifopt_core
-    drake::drake
 )
 target_include_directories(${PROJECT_NAME} 
   PUBLIC
@@ -86,8 +84,7 @@ target_link_libraries(trunk_mpc
     PRIVATE
     ${PROJECT_NAME}
     ifopt::ifopt_ipopt
-    lcm
-    drake::drake)
+    lcm)
 
 #############
 ## Testing ##
@@ -101,7 +98,6 @@ target_link_libraries(${PROJECT_NAME}-example
   PRIVATE
     ${PROJECT_NAME} 
     ifopt::ifopt_ipopt
-    drake::drake
 )
 add_test(${PROJECT_NAME}-example ${PROJECT_NAME}-example)
 
@@ -117,7 +113,6 @@ if (TARGET GTest::GTest) # only build when modern targets exists
     PRIVATE
       ${PROJECT_NAME}
       GTest::GTest GTest::Main
-      drake::drake
   )
   add_test(${PROJECT_NAME}-test ${PROJECT_NAME}-test)
 endif()

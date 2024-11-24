@@ -3,6 +3,7 @@
 
 // #include <towr/terrain/examples/height_map_examples.h>
 #include <towr/terrain/height_map.h>
+#include <tower/terrain/Grid.h>
 #include <towr/nlp_formulation.h>
 #include <ifopt/ipopt_solver.h>
 
@@ -75,7 +76,7 @@ int main(int argc, char *argv[])
 
     // Command line argument parsing
     // fl_x, br_z, etc. are front left foot x position, back right foot z position, etc.
-    char usage_message[] = "Usage: trunk_mpc gait_type={walk,trot,pace,bound,gallop} optimize_gait={0,1} x_init, y_init, yaw_init, x_final, y_final, yaw_final, world_map.sdf, fl_x, fl_y, fl_z, fr_x, fr_y, fr_z, bl_x, bl_y, bl_z, br_x, br_y, br_z, trunk_z_init, trunk_z_final, roll_init, pitch_init, roll_final, pitch_final, duration";
+    char usage_message[] = "Usage: trunk_mpc gait_type={walk,trot,pace,bound,gallop} optimize_gait={0,1} x_init, y_init, yaw_init, x_final, y_final, yaw_final, grid.csv, fl_x, fl_y, fl_z, fr_x, fr_y, fr_z, bl_x, bl_y, bl_z, br_x, br_y, br_z, trunk_z_init, trunk_z_final, roll_init, pitch_init, roll_final, pitch_final, duration";
     if (argc != 29)
     {
         std::cout << usage_message << std::endl;
@@ -118,7 +119,7 @@ int main(int argc, char *argv[])
     float x_final = std::stof(argv[6]);
     float y_final = std::stof(argv[7]);
     float yaw_final = std::stof(argv[8]);
-    std::string world_sdf = std::string(argv[9]);
+    const std::string world_sdf = std::string(argv[9]);
     float fl_x = std::stof(argv[10]);
     float fl_y = std::stof(argv[11]);
     float fl_z = std::stof(argv[12]);
@@ -143,7 +144,7 @@ int main(int argc, char *argv[])
     NlpFormulation formulation;
 
     // terrain
-    formulation.terrain_ = std::make_shared<GridSDF>(world_sdf);
+    formulation.terrain_ = std::make_shared<Grid>(world_sdf);
 
     // Kinematic limits and dynamic parameters
     formulation.model_ = RobotModel(RobotModel::MiniCheetah);
