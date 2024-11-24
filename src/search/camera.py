@@ -1,4 +1,5 @@
 import pyglet
+from search import ENABLE_VISUALIZATION
 
 # MODIFIED FROM: https://github.com/pyglet/pyglet/blob/master/examples/window/camera.py
 
@@ -56,74 +57,78 @@ manager, allowing easy use of "with"::
 
 """
 
+if ENABLE_VISUALIZATION:
 
-class Camera:
-    """A simple 2D camera."""
+    class Camera:
+        """A simple 2D camera."""
 
-    def __init__(
-        self,
-        x: float = 0,
-        y: float = 0,
-        zoom: float = 1,
-    ):
-        self._window = None
-        self.x = x
-        self.y = y
-        self.zoom = zoom
+        def __init__(
+            self,
+            x: float = 0,
+            y: float = 0,
+            zoom: float = 1,
+        ):
+            self._window = None
+            self.x = x
+            self.y = y
+            self.zoom = zoom
 
-    def _begin(self):
-        # Set the current camera offset so you can draw your scene.
+        def _begin(self):
+            # Set the current camera offset so you can draw your scene.
 
-        # Translate using the offset.
-        view_matrix = self._window.view.translate(
-            (-self.x * self.zoom, -self.y * self.zoom, 0)
-        )
-        # Scale by zoom level.
-        view_matrix = view_matrix.scale((self.zoom, self.zoom, 1))
+            # Translate using the offset.
+            view_matrix = self._window.view.translate(
+                (-self.x * self.zoom, -self.y * self.zoom, 0)
+            )
+            # Scale by zoom level.
+            view_matrix = view_matrix.scale((self.zoom, self.zoom, 1))
 
-        self._window.view = view_matrix
+            self._window.view = view_matrix
 
-    def _end(self):
-        # Since this is a matrix, you will need to reverse the translate after rendering otherwise
-        # it will multiply the current offset every draw update pushing it further and further away.
+        def _end(self):
+            # Since this is a matrix, you will need to reverse the translate after rendering otherwise
+            # it will multiply the current offset every draw update pushing it further and further away.
 
-        # Reverse scale, since that was the last transform.
-        view_matrix = self._window.view.scale((1 / self.zoom, 1 / self.zoom, 1))
-        # Reverse translate.
-        view_matrix = view_matrix.translate((self.x * self.zoom, self.y * self.zoom, 0))
+            # Reverse scale, since that was the last transform.
+            view_matrix = self._window.view.scale((1 / self.zoom, 1 / self.zoom, 1))
+            # Reverse translate.
+            view_matrix = view_matrix.translate(
+                (self.x * self.zoom, self.y * self.zoom, 0)
+            )
 
-        self._window.view = view_matrix
+            self._window.view = view_matrix
 
-    def __call__(self, window: pyglet.window.BaseWindow):
-        self._window = window
-        return self
+        def __call__(self, window: pyglet.window.BaseWindow):
+            self._window = window
+            return self
 
-    def __enter__(self):
-        assert (
-            self._window is not None
-        ), "No active window. Call with window first: `with camera(window):`"
-        self._begin()
+        def __enter__(self):
+            assert (
+                self._window is not None
+            ), "No active window. Call with window first: `with camera(window):`"
+            self._begin()
 
-    def __exit__(self, exception_type, exception_value, traceback):
-        self._end()
-        self._window = None
+        def __exit__(self, exception_type, exception_value, traceback):
+            self._end()
+            self._window = None
 
+    class CenteredCamera(Camera):
+        """A simple 2D camera class. 0, 0 will be the center of the screen, as opposed to the bottom left."""
 
-class CenteredCamera(Camera):
-    """A simple 2D camera class. 0, 0 will be the center of the screen, as opposed to the bottom left."""
+        def begin(self):
+            x = -self._window.width // 2 / self.zoom + self.x
+            y = -self._window.height // 2 / self.zoom + self.y
 
-    def begin(self):
-        x = -self._window.width // 2 / self.zoom + self.x
-        y = -self._window.height // 2 / self.zoom + self.y
+            view_matrix = self._window.view.translate(
+                (-x * self.zoom, -y * self.zoom, 0)
+            )
+            view_matrix = view_matrix.scale((self.zoom, self.zoom, 1))
+            self._window.view = view_matrix
 
-        view_matrix = self._window.view.translate((-x * self.zoom, -y * self.zoom, 0))
-        view_matrix = view_matrix.scale((self.zoom, self.zoom, 1))
-        self._window.view = view_matrix
+        def end(self):
+            x = -self._window.width // 2 / self.zoom + self.x
+            y = -self._window.height // 2 / self.zoom + self.y
 
-    def end(self):
-        x = -self._window.width // 2 / self.zoom + self.x
-        y = -self._window.height // 2 / self.zoom + self.y
-
-        view_matrix = self._window.view.scale((1 / self.zoom, 1 / self.zoom, 1))
-        view_matrix = view_matrix.translate((x * self.zoom, y * self.zoom, 0))
-        self._window.view = view_matrix
+            view_matrix = self._window.view.scale((1 / self.zoom, 1 / self.zoom, 1))
+            view_matrix = view_matrix.translate((x * self.zoom, y * self.zoom, 0))
+            self._window.view = view_matrix

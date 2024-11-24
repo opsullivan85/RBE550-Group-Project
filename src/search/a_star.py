@@ -4,9 +4,12 @@ from typing import Optional
 
 from simulation import SimAgent, SimObject
 from states import State, discretize_state
-from camera import Camera
+from search import ENABLE_VISUALIZATION
+
+if ENABLE_VISUALIZATION:
+    from camera import Camera
+    from visualization import DisplayServer, display
 from util import PriorityQueue
-from visualization import DisplayServer, display
 import logging
 
 logger = logging.getLogger(__name__)
@@ -49,7 +52,7 @@ def a_star(
     dt: float,
     state_space_bin_sizes: dict[str, float],
     visualize: int = 0,
-    camera: Optional[Camera] = None,
+    camera: Optional["Camera"] = None,
     max_iterations: int = None,
 ) -> list[SimAgent]:
     """Performs A* for a single agent in a world of static objects.

@@ -49,8 +49,9 @@ RUN mkdir repos && \
 RUN cd repos && \
     git clone https://github.com/lcm-proj/lcm.git && \
     cd lcm && \
-    git checkout f18f8a6 && \
+    git checkout dc115bb && \
     rm -r .git && \
+    pip3 install ninja && \
     pip3 install -v . && \
     mkdir build && \
     cd build && \

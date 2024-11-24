@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Enum
 from functools import cached_property
+from typing import Union
 
 import numpy as np
 import pyglet
@@ -88,8 +89,8 @@ class HeightMap(SimObject):
         return polygons
 
     def drawables(
-        self, batch: pyglet.graphics.Batch
-    ) -> list[pyglet.shapes.ShapeBase | pyglet.sprite.Sprite]:
+        self, batch: "pyglet.graphics.Batch"
+    ) -> list[Union["pyglet.shapes.ShapeBase" "pyglet.sprite.Sprite"]]:
         sprites = []
         with np.nditer(
             self.state.heights, flags=["multi_index"], op_flags=["readonly"]
@@ -168,7 +169,7 @@ class HeightMap(SimObject):
         except IndexError:
             return False
         # make sure not on occupied cell in map
-        return self.state.heights[*gs] != np.inf
+        return self.state.heights[gs[0], gs[1]] != np.inf
 
     def any_intersects(self, others: list[SimObject]) -> bool:
         """checks if any of the other objects are intersecting with the map

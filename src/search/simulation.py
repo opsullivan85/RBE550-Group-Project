@@ -3,11 +3,15 @@ import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import cached_property
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
-import pyglet
+from search import ENABLE_VISUALIZATION
+
+if ENABLE_VISUALIZATION:
+    import pyglet
 import shapely
+
 
 from control import Control
 from states import Position, State
@@ -24,8 +28,8 @@ class Drawable(ABC):
 
     @abstractmethod
     def drawables(
-        self, batch: pyglet.graphics.Batch
-    ) -> list[pyglet.shapes.ShapeBase | pyglet.sprite.Sprite]:
+        self, batch: "pyglet.graphics.Batch"
+    ) -> list[Union["pyglet.shapes.ShapeBase" "pyglet.sprite.Sprite"]]:
         """pyglet.shapes object to be used for rendering.
         Be careful if trying to cache. Pyglet objects must be created
         after the window.
@@ -154,8 +158,8 @@ class StaticRect(SimObject):
         return [shapely.geometry.Polygon(verts)]
 
     def drawables(
-        self, batch: pyglet.graphics.Batch
-    ) -> list[pyglet.shapes.ShapeBase | pyglet.sprite.Sprite]:
+        self, batch: "pyglet.graphics.Batch"
+    ) -> list[Union["pyglet.shapes.ShapeBase" "pyglet.sprite.Sprite"]]:
         sprite = pyglet.shapes.Rectangle(
             x=self.state.x,
             y=self.state.y,
