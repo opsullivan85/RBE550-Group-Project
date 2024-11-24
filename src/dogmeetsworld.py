@@ -17,6 +17,7 @@ import math
 import numpy as np
 import os
 import sys
+from enum import Enum
 from pathlib import Path
 
 import obstacles as ob
@@ -45,6 +46,11 @@ pitch_init = 0.0
 
 world_sdf_path: str = "/home/ws/src/world.sdf"
 
+class PathType(Enum):
+    MANUAL=1
+    GENERATED=2
+path_type = PathType.MANUAL
+
 avg_trunk_vel = 0.6
 
 # environment
@@ -56,6 +62,7 @@ res_m_p_cell = 0.17
 # start and goal
 start = np.array([0, 0, 45 / 180 * math.pi])  # x, y, yaw
 goal = np.array([env_size_x, env_size_y, 45 / 180 * math.pi])
+
 #####################################################
 
 
@@ -275,6 +282,8 @@ def setupVisualization(builder, scene_graph, publish_period=None):
     # Add the visualizer to the builder
     MeshcatVisualizer.AddToBuilder(builder, scene_graph, meshcat, meshcat_params)
 
+    
+def createManualPath():
     # manually create a path from start to end
     path = np.array(
         [start, [1.25, 1.4, 0], [3.75, 1.4, 0], [3.75 + 0.75, 1.5 + 0.4, 0], goal]
@@ -290,6 +299,29 @@ def setupVisualization(builder, scene_graph, publish_period=None):
     return path
 
 
+def createPath(path_type: PathType):
+    """ Either provide a manually created or search-based generated path.
+    """
+    match path_type:
+        case PathType.MANUAL:
+            return createManualPath()
+        
+        case PathType.GENERATED:
+            a_star_path = search(
+                map=grid.toArray(),
+                map_cell_size=res_m_p_cell,
+                initial_state=Point(0, 0),
+                final_state=Point(4, 4),
+                dt=0.1,
+            )
+            if not a_star_path.sucess:
+                raise Exception(a_star_path.failure_msg)
+            robot_path = np.asarray(
+                [[state.x, state.y, state.theta] for state in a_star_path.result][::20]
+            )
+            return robot_path
+
+        
 quadruped_drake_path = str(Path(quadruped_drake.__file__).parent)
 
 
@@ -314,26 +346,12 @@ grid = createObstacleGrid()
 world_parser = createWorld(world_sdf_path, grid)
 
 # create path and visualize
-# robot_path = createManualPath()
+robot_path = createPath(path_type)
 
-a_star_path = search(
-    map=grid.toArray(),
-    map_cell_size=res_m_p_cell,
-    initial_state=Point(0, 0),
-    final_state=Point(4, 4),
-    dt=0.1,
-)
-if not a_star_path.sucess:
-    raise Exception(a_star_path.failure_msg)
-
-robot_path = np.asarray(
-    [[state.x, state.y, state.theta] for state in a_star_path.result][::20]
-)
 print("---------------------------------------------------")
 print(f"Number of waypoints in path: {robot_path.shape[0]}")
 print("---------------------------------------------------")
-# print(len(a_star_path.result))
-# exit()
+
 robot_path_sdf = path_vis.PathVisualizer(robot_path).toSdf()
 world_parser.AddModelsFromString(file_contents=robot_path_sdf, file_type="sdf")
 
