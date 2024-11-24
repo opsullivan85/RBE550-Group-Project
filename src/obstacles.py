@@ -45,8 +45,8 @@ class Obstacle:
         # the frame of the cell of an obstacle is at the bottom left corner
 
         # corner points in cell units relative to the frame of the obstacle
-        corner_pts_cell = [(0,0), (0,1), (1,1), (0,1)]
-        # conver to continuous points in the world frame
+        corner_pts_cell = [(0,0), (0,self.size_y_cell), (self.size_x_cell,self.size_y_cell), (self.size_x_cell,0)]
+        # convert to continuous points in the world frame
         return [(self.getPosX() + x_cell*self.scale_m_p_cell, self.getPosY() +
                  y_cell*self.scale_m_p_cell) for x_cell, y_cell in corner_pts_cell]
 

@@ -88,7 +88,7 @@ def createWorld(world_sdf_path, grid):
     border = np.array( [[0,0,-math.pi/4], [0, env_size_y, math.pi/4],
                         [env_size_x, env_size_y, -math.pi/4], [env_size_x, 0, math.pi/4], [0, 0,
                                                                                            -math.pi/4]] )
-    border_sdf = path_vis.PathVisualizer("border", border, with_color=False).toSdf()    
+    border_sdf = path_vis.PathVisualizer("border", border, pretty=False).toSdf()    
     parser.AddModelsFromString(file_contents=border_sdf, file_type="sdf")
     
     return parser

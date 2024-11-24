@@ -58,8 +58,11 @@ class PathVisualizer:
         return sdf
 
     def pathPointToSdf(self, pt: np.ndarray, **kwargs):
-        # create a sphere at the point
+        # create a cylinder at the point
 
+        if pt.size == 2:
+            return ""
+        
         link_id = kwargs.get('link_id', None)
         
         # create sphere sdf visualization strings
