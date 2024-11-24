@@ -3,6 +3,7 @@ import numpy as np
 import copy
 import random as rand
 
+from enum import Enum
 from dataclasses import dataclass
 
 
@@ -58,8 +59,6 @@ class Column(Obstacle):
     def __init__(self, pos_x_cell=0, pos_y_cell=0):
         super().__init__(size_x_cell=4, size_y_cell=4, size_z=0.75, pos_x_cell=pos_x_cell, pos_y_cell=pos_y_cell)
     
-g_obstacle_options = [Step(), Column()]
-
 
 class Grid:
     def __init__(self, size_x, size_y, res_m_p_cell):
@@ -160,18 +159,12 @@ class Grid:
         return False
 
 
-def randInsertObstacle(grid, ob_i=None):
+def randInsertObstacle(grid, obstacle_options: list, weights: list):
     """Randomly choose an obstacle and location to place it in the provided grid.
     :param ob_i If specified, gives the index of the obstacle type to insert.
     """
-    rand.seed(1)
-
-    if ob_i == None:
-        # psuedorandomly choose obstacle type
-        ob = copy.deepcopy(rand.choice(g_obstacle_options))
-    else:
-        # explicitly choose obstacle type
-        ob = copy.deepcopy(g_obstacle_options[ob_i])
+    # psuedorandomly choose obstacle type based on weights
+    ob = copy.deepcopy(rand.choices(population=obstacle_options, weights=weights)[0])
     
     for _ in range(grid.getSizeXCell() * grid.getSizeYCell()):
         # choose random location for obstacle
@@ -185,25 +178,31 @@ def randInsertObstacle(grid, ob_i=None):
     return None
 
 
-def fillObstacles(grid, density):
+class EnvType(Enum):
+    SIMPLE=1
+    ROUGH=2
+
+
+def fillObstacles(grid, density, env_type = EnvType.SIMPLE):
     """
     Fill a grid with randomly selected obstacles at random locations until the
     obstacle density is reached. The density is a value between 0.0 and 1.0.
     """
-    # seed random number generation so that environments are consistent for particular densities
+    # seed random number generation so that environments are consistent for
+    # particular densities
     rand.seed(1)
     target_area = density * grid.getSizeXCell() * grid.getSizeYCell()
+
+    # obstacles types and distribution weights
+    obstacle_options = [Step(), Column()]
+    weights = [2, 1]
     
     # track current density and increment based on selected obstacle, keep going
     # until the desired density is reached
     curr_area = 0.0
-    # object type index
-    ob_i = 0
     while curr_area < target_area:
-        ob = randInsertObstacle(grid, ob_i)
-        # alternate between inserting each type of obstacle so that there are an
-        # equal number of obstacles of each type
-        ob_i = not ob_i
+        ob = randInsertObstacle(grid, obstacle_options=obstacle_options,
+                                weights=weights)
         # if ob insertion failed, then stop
         if ob == None:
             return

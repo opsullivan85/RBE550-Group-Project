@@ -23,7 +23,7 @@ path = np.array([[0,1],
                  [0,2]])
 
 # create SDF
-path_vis = PathVisualizer(path, line_thickness=0.01, sphere_radius=0.05)
+path_vis = PathVisualizer("test", path, line_thickness=0.01, sphere_radius=0.05)
 path_sdf = path_vis.toSdf()
 
 # create the grid, fill it with obstacles, and convert to SDF

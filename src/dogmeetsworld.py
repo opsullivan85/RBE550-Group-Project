@@ -26,7 +26,7 @@ import path_vis
 ############### Common Parameters ###################
 show_trunk_model = True
 
-planning_method = "powr"  # "powr" or "towr" or "basic"
+planning_method = "basic"  # "powr" or "towr" or "basic"
 control_method = "ID"  # ID = Inverse Dynamics (standard QP),
 # B = Basic (simple joint-space PD),
 # MPTC = task-space passivity
@@ -83,6 +83,14 @@ def createWorld(world_sdf_path, grid):
 
     parser = Parser(plant, scene_graph, "world")
     parser.AddModels(file_contents=world_sdf, file_type="sdf")
+
+    # create border visualization
+    border = np.array( [[0,0,-math.pi/4], [0, env_size_y, math.pi/4],
+                        [env_size_x, env_size_y, -math.pi/4], [env_size_x, 0, math.pi/4], [0, 0,
+                                                                                           -math.pi/4]] )
+    border_sdf = path_vis.PathVisualizer("border", border, with_color=False).toSdf()    
+    parser.AddModelsFromString(file_contents=border_sdf, file_type="sdf")
+    
     return parser
 
 
@@ -352,7 +360,7 @@ print("---------------------------------------------------")
 print(f"Number of waypoints in path: {robot_path.shape[0]}")
 print("---------------------------------------------------")
 
-robot_path_sdf = path_vis.PathVisualizer(robot_path).toSdf()
+robot_path_sdf = path_vis.PathVisualizer("robot", robot_path).toSdf()
 world_parser.AddModelsFromString(file_contents=robot_path_sdf, file_type="sdf")
 
 

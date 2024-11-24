@@ -2,9 +2,35 @@ from scipy.spatial.transform import Rotation as R
 import numpy as np
 import itertools
 import math
+from enum import Enum
+
 
 class PathVisualizer:
-    def __init__(self, path: np.ndarray, line_thickness: int = 0.01, sphere_radius: int = 0.05):
+    _black ="""
+            <material>
+              <ambient>0 0 0 1</ambient>
+              <diffuse>0 0 0 1</diffuse>
+              <specular>0.1 0.1 0.1 1</specular>
+            </material>
+        """
+    _blue = """
+            <material>
+              <ambient>0 0 1 1</ambient>
+              <diffuse>0 0 1 1</diffuse>
+              <specular>0.1 0.1 0.1 1</specular>
+            </material>
+        """
+    _green = """
+            <material>
+              <ambient>0 1 0 1</ambient>
+              <diffuse>0 1 0 1</diffuse>
+              <specular>0.1 0.1 0.1 1</specular>
+            </material>
+        """
+    
+    def __init__(self, name: str, path: np.ndarray, pretty=True, line_thickness: int = 0.01, sphere_radius: int = 0.05):
+        self._pretty = pretty
+        self._name = name
         self._path = path
         self._line_thickness = line_thickness
         self._sphere_radius = sphere_radius
@@ -19,11 +45,12 @@ class PathVisualizer:
             i += 1
 
         # add sphere for last point
-        links_sdf += self.pathPointToSdf(self._path[-1], link_id=i)
+        if self._pretty:
+            links_sdf += self.pathPointToSdf(self._path[-1], link_id=i)
         
         sdf = f"""<?xml version="1.0" ?>
         <sdf version="1.4">
-            <model name="path">
+            <model name="path_{self._name}">
               {links_sdf}
             </model>
         </sdf>
@@ -36,13 +63,9 @@ class PathVisualizer:
         link_id = kwargs.get('link_id', None)
         
         # create sphere sdf visualization strings
-        material_blue = """
-            <material>
-              <ambient>0 0 1 1</ambient>
-              <diffuse>0 0 1 1</diffuse>
-              <specular>0.1 0.1 0.1 1</specular>
-            </material>
-        """
+        material = self._black
+        if self._pretty:
+            material = self._blue
 
         waypoint_vis = f"""
           <visual name="waypoint_vis">
@@ -53,7 +76,7 @@ class PathVisualizer:
                 <length>{self._sphere_radius*3}</length>
               </cylinder>
             </geometry>
-            {material_blue}
+            {material}
           </visual>
         """
         if link_id is not None:
@@ -96,13 +119,10 @@ class PathVisualizer:
         # extrinsic rotations about x, y, z (in this order)
         euler = R.from_rotvec(angle * rot_axis).as_euler('xyz')
         
-        material_green = """
-            <material>
-              <ambient>0 1 0 1</ambient>
-              <diffuse>0 1 0 1</diffuse>
-              <specular>0.1 0.1 0.1 1</specular>
-            </material>
-        """
+        material = self._black
+        if self._pretty:
+            material = self._green
+
         line_vis = f"""
           <visual name="vis_{link_id}">
             <pose>{line_vec[0]/2} {line_vec[1]/2} {line_vec[2]/2} {euler[0]} {euler[1]} {euler[2]}</pose>
@@ -112,7 +132,7 @@ class PathVisualizer:
                 <length>{line_len}</length>
               </cylinder>
             </geometry>
-            {material_green}
+            {material}
           </visual>
         """
         return line_vis
@@ -123,7 +143,9 @@ class PathVisualizer:
         # for the start point, and a cyclinder goes from the start to the end.
 
         # create line visualization strings
-        waypoint_vis = self.pathPointToSdf(start)
+        waypoint_vis = ""
+        if self._pretty:
+            waypoint_vis = self.pathPointToSdf(start)
         line_vis = self.pathLineToSdf(start, end, link_id=id_str)
 
         link_name = f"link_{id_str}"
