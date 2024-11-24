@@ -50,10 +50,22 @@ class Obstacle:
         return [(self.getPosX() + x_cell*self.scale_m_p_cell, self.getPosY() +
                  y_cell*self.scale_m_p_cell) for x_cell, y_cell in corner_pts_cell]
 
+    def updateHeight(self):
+        return
+
     
 class Step(Obstacle):
     def __init__(self, pos_x_cell=0, pos_y_cell=0):
         super().__init__(size_x_cell=2, size_y_cell=2, size_z = 0.10, pos_x_cell=pos_x_cell, pos_y_cell=pos_y_cell)
+
+
+class VariableHeightStep(Obstacle):
+    def __init__(self, pos_x_cell=0, pos_y_cell=0):
+        super().__init__(size_x_cell=2, size_y_cell=2, size_z = 0.10, pos_x_cell=pos_x_cell, pos_y_cell=pos_y_cell)
+
+    def updateHeight(self):
+        self.size_z = rand.random() * 0.2
+        
     
 class Column(Obstacle):
     def __init__(self, pos_x_cell=0, pos_y_cell=0):
@@ -171,6 +183,7 @@ def randInsertObstacle(grid, obstacle_options: list, weights: list):
         ob.pos_x_cell = rand.randrange(grid.getSizeXCell())
         ob.pos_y_cell = rand.randrange(grid.getSizeYCell())
         ob.scale_m_p_cell = grid.getRes()
+        ob.updateHeight()
 
         # try place obstacle
         if grid.tryInsertObstacle(ob):
@@ -178,12 +191,12 @@ def randInsertObstacle(grid, obstacle_options: list, weights: list):
     return None
 
 
-class EnvType(Enum):
+class Terrain(Enum):
     SIMPLE=1
     ROUGH=2
 
 
-def fillObstacles(grid, density, env_type = EnvType.SIMPLE):
+def fillObstacles(grid, density, terrain = Terrain.SIMPLE):
     """
     Fill a grid with randomly selected obstacles at random locations until the
     obstacle density is reached. The density is a value between 0.0 and 1.0.
@@ -196,6 +209,10 @@ def fillObstacles(grid, density, env_type = EnvType.SIMPLE):
     # obstacles types and distribution weights
     obstacle_options = [Step(), Column()]
     weights = [2, 1]
+
+    if terrain == Terrain.ROUGH:
+        obstacle_options = [VariableHeightStep(), Column()]
+        weights = [16, 1]
     
     # track current density and increment based on selected obstacle, keep going
     # until the desired density is reached

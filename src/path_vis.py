@@ -28,10 +28,11 @@ class PathVisualizer:
             </material>
         """
     
-    def __init__(self, name: str, path: np.ndarray, pretty=True, line_thickness: int = 0.01, sphere_radius: int = 0.05):
-        self._pretty = pretty
+    def __init__(self, name: str, path: np.ndarray, pretty=True, height=0.3, line_thickness: int = 0.01, sphere_radius: int = 0.05):
         self._name = name
         self._path = path
+        self._pretty = pretty
+        self._height = height
         self._line_thickness = line_thickness
         self._sphere_radius = sphere_radius
 
@@ -86,7 +87,7 @@ class PathVisualizer:
             link_name = f'link_{link_id}'
             waypoint_vis = f"""
                 <link name="{link_name}">
-                  <pose>{pt[0]} {pt[1]} 0 0 0 0</pose>
+                  <pose>{pt[0]} {pt[1]} {self._height} 0 0 0</pose>
                   {waypoint_vis}
                 </link>
                 <joint name="fixed_joint_{link_id}" type="fixed">
@@ -109,7 +110,7 @@ class PathVisualizer:
         # Find the euler angles to transform a vertical cylinder to go from the
         # start to end point.
 
-        line_vec = np.append(end_pt-start_pt, 0) # add a zero z component
+        line_vec = np.append(end_pt-start_pt, 0)
         line_len = np.linalg.norm(line_vec)
 
         # first calculate the angle-axis representation
@@ -154,7 +155,7 @@ class PathVisualizer:
         link_name = f"link_{id_str}"
         link_sdf = f"""
         <link name="{link_name}">
-          <pose>{start[0]} {start[1]} 0 0 0 0</pose>
+          <pose>{start[0]} {start[1]} {self._height} 0 0 0</pose>
           {waypoint_vis}
           {line_vis}
         </link>

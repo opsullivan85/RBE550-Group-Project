@@ -21,10 +21,9 @@ env_size_x=5.0
 env_size_y=5.0
 grid = ob.Grid(size_x=env_size_x, size_y=env_size_y, res_m_p_cell=0.25)
 grid.insertFreeZone(pos_x=0.0, pos_y=0.0, radius=1)
-#grid.insertFreeZone(pos_x=grid.getSizeX(), pos_y=grid.getSizeY(), radius=1)
-grid.insertFreeZone(pos_x=env_size_x, pos_y=env_size_y, radius=1)
+grid.insertFreeZone(pos_x=grid.getSizeX(), pos_y=grid.getSizeY(), radius=1)
 
-ob.fillObstacles(grid, density=0.7)
+ob.fillObstacles(grid, density=0.8, terrain=ob.Terrain.ROUGH)
 world_sdf = ob.gridToSdf(grid)
 
 # manually specify path
@@ -44,7 +43,7 @@ border = np.array( [[0,0,-math.pi/4],
                     [env_size_x, env_size_y, -math.pi/4],
                     [env_size_x, 0, math.pi/4],
                     [0, 0, -math.pi/4]] )
-border_sdf = PathVisualizer("border", border, pretty=False).toSdf()    
+border_sdf = PathVisualizer("border", border, pretty=False, height=0).toSdf()    
 
 # create a model visualizer and add the sdf models
 meshcat = StartMeshcat()

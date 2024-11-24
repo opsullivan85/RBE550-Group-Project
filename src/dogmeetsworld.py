@@ -26,7 +26,7 @@ import path_vis
 ############### Common Parameters ###################
 show_trunk_model = True
 
-planning_method = "basic"  # "powr" or "towr" or "basic"
+planning_method = "powr"  # "powr" or "towr" or "basic"
 control_method = "ID"  # ID = Inverse Dynamics (standard QP),
 # B = Basic (simple joint-space PD),
 # MPTC = task-space passivity
@@ -54,9 +54,11 @@ path_type = PathType.MANUAL
 avg_trunk_vel = 0.6
 
 # environment
+terrain = ob.Terrain.ROUGH
 env_size_x = 5.0
 env_size_y = 5.0
-obs_density = 0.1
+simple_obs_density = 0.1
+rough_obs_density = 0.8
 res_m_p_cell = 0.17
 
 # start and goal
@@ -66,13 +68,18 @@ goal = np.array([env_size_x, env_size_y, 45 / 180 * math.pi])
 #####################################################
 
 
-def createObstacleGrid():
+def createObstacleGrid(terrain):
     # create the obstacle environment and save it to a temporary file for towr to process
     grid = ob.Grid(size_x=env_size_x, size_y=env_size_y, res_m_p_cell=res_m_p_cell)
-    r = 1.25
+    r = 1
     grid.insertFreeZone(pos_x=start[0], pos_y=start[1], radius=r)
     grid.insertFreeZone(pos_x=goal[0], pos_y=goal[1], radius=r)
-    ob.fillObstacles(grid, density=obs_density)
+
+    density=simple_obs_density
+    if terrain == ob.Terrain.ROUGH:
+        density = rough_obs_density
+    
+    ob.fillObstacles(grid, density=density, terrain=terrain)
     return grid
 
 
@@ -88,7 +95,7 @@ def createWorld(world_sdf_path, grid):
     border = np.array( [[0,0,-math.pi/4], [0, env_size_y, math.pi/4],
                         [env_size_x, env_size_y, -math.pi/4], [env_size_x, 0, math.pi/4], [0, 0,
                                                                                            -math.pi/4]] )
-    border_sdf = path_vis.PathVisualizer("border", border, pretty=False).toSdf()    
+    border_sdf = path_vis.PathVisualizer("border", border, pretty=False, height=0).toSdf()    
     parser.AddModelsFromString(file_contents=border_sdf, file_type="sdf")
     
     return parser
@@ -294,7 +301,7 @@ def setupVisualization(builder, scene_graph, publish_period=None):
 def createManualPath():
     # manually create a path from start to end
     path = np.array(
-        [start, [1.25, 1.4, 0], [3.75, 1.4, 0], [3.75 + 0.75, 1.5 + 0.4, 0], goal]
+        [start, [1.25, 1.4, 0], [2, 4, 0], goal]
     )
 
     # fix yaw of each path point
@@ -350,7 +357,7 @@ plant = builder.AddSystem(MultibodyPlant(time_step=dt))
 plant.RegisterAsSourceForSceneGraph(scene_graph)
 quad = Parser(plant=plant).AddModelFromFile(robot_urdf, "quad")
 
-grid = createObstacleGrid()
+grid = createObstacleGrid(terrain)
 world_parser = createWorld(world_sdf_path, grid)
 
 # create path and visualize
