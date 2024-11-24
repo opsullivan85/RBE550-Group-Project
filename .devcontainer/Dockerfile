@@ -30,7 +30,8 @@ RUN pip3 install \
     drake==1.24.0 \
     scipy==1.14.1 \
     matplotlib \
-    shapely
+    shapely \
+    pyglet
 
 # IFOPT
 RUN mkdir repos && \
