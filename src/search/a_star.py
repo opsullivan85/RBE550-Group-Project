@@ -22,6 +22,12 @@ class SearchException(Exception):
     ...
 
 
+class SearchConditionException(SearchException):
+    """Exception for when the search is quickly deemed impossible"""
+
+    ...
+
+
 @dataclass(frozen=True, order=True)
 class SearchNode:
     data: any = field(compare=False)
@@ -86,7 +92,7 @@ def a_star(
         logging.debug(
             f"Failed a_star serach from {agent.state = } to {target_state = }. Agent intially intersecting obstacles."
         )
-        raise SearchException(
+        raise SearchConditionException(
             f"Could not find path from {agent.state = } to {target_state = }. Agent intially intersecting obstacles."
         )
 
@@ -99,7 +105,7 @@ def a_star(
         logging.debug(
             f"Failed a_star serach from {agent.state = } to {target_state = }. Target state intersecting obstacles."
         )
-        raise SearchException(
+        raise SearchConditionException(
             f"Could not find path from {agent.state = } to {target_state = }. Target state intersecting obstacles."
         )
     explored: set[State] = set()

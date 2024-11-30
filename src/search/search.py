@@ -75,7 +75,7 @@ def search(
     heightmap = HeightMap.default_from_heightmap(height_map=map, scale=map_cell_size)
     initial_state = HoloQuadState(**dataclasses.asdict(initial_state))
     final_state = HoloQuadState(**dataclasses.asdict(final_state))
-    search_agent = HoloQuad(length=2, width=1, state=initial_state)
+    search_agent = HoloQuad(length=2.5, width=1.5, state=initial_state)
     try:
         result: list[HoloQuad] = a_star(
             agent=search_agent,
@@ -95,6 +95,7 @@ def search(
 if __name__ == "__main__":
     from visualization import Camera
     from visualization import DisplayServer
+    from a_star import SearchConditionException
     import time
 
     camera = Camera(-3, 0, 30)
@@ -106,7 +107,7 @@ if __name__ == "__main__":
     map[map > 0.40] = np.inf
     map *= 0.1
 
-    initial_state = Position(x=2, y=2, theta=0)
+    initial_state = Position(x=1, y=1, theta=0)
     final_state = Position(x=15, y=15, theta=np.pi / 2)
     ret = search(
         map=map,
@@ -114,21 +115,21 @@ if __name__ == "__main__":
         initial_state=initial_state,
         final_state=final_state,
         dt=0.5,
-        # visualize=100,
-        # camera=camera,
+        visualize=100,
+        camera=camera,
     )
 
     if not ret.sucess:
-        raise Exception("Search Failed")
+        raise Exception(ret.failure_msg)
 
     states = ret.result
     heightmap = HeightMap.default_from_heightmap(height_map=map, scale=2)
     with DisplayServer() as display_server:
         while states:
-            dog = HoloQuad(length=2, width=1, state=states.pop(0))
+            dog = HoloQuad(length=1.5, width=0.75, state=states.pop(0))
             target_dog = HoloQuad(
-                length=2,
-                width=1,
+                length=1.5,
+                width=0.75,
                 state=HoloQuadState(**dataclasses.asdict(final_state)),
             )
             display_server.set_camera(camera)
