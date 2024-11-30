@@ -18,16 +18,28 @@ This repository contains code for the simulation and control of quadruped robots
 
 Clone this repository: `git clone https://github.com/vincekurtz/quadruped_drake.git`
 
+Setup the build profile for conan:
+
+``` shell
+conan profile detect --force
+```
+
+Install dependencies through Conan (this create a build directory):
+
+``` shell
+conan install . --output-folder=build --build=missing
+```
+
+Configure the build:
+``` shell
+cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DCMAKE_BUILD_TYPE=Release
+
+```
+
 Compile C\+\+ code (includes TOWR and custom LCM bindings for interface with drake):
 ```
-mkdir -p build
-cd build
-cmake ..
 make
 ```
 
 ## Usage
-
-Start the drake visualizer `bazel-bin/tools/drake_visualizer`.
-
-Run the simulation script `./simulate.py`.

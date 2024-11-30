@@ -1,0 +1,6 @@
+[requires]
+rapidcsv/8.83
+
+[generators]
+CMakeDeps
+CMakeToolchain

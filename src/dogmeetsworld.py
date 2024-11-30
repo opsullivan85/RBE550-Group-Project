@@ -45,6 +45,7 @@ roll_init = 0.0
 pitch_init = 0.0
 
 world_sdf_path: str = "/home/ws/src/world.sdf"
+grid_csv_path: str = "/home/ws/src/grid.csv"
 
 class PathType(Enum):
     MANUAL=1
@@ -163,7 +164,7 @@ def addTrunkGeometry(scene_graph):
     return trunk_source_id, trunk_frame_ids
 
 
-def makePlanner(planning_method, world_sdf_path, robot_path):
+def makePlanner(planning_method, grid_csv_path, robot_path):
     # high-level trunk-model planner
     x_s, y_s, yaw_s = robot_path[0]
 
@@ -212,7 +213,7 @@ def makePlanner(planning_method, world_sdf_path, robot_path):
                 y_final=y_f,
                 z_final=z_init,
                 yaw_final=yaw_f,
-                world_map=world_sdf_path,
+                world_map=grid_csv_path,
                 foot_positions=p_foot_pos,
                 duration=dur,
             )
@@ -226,7 +227,7 @@ def makePlanner(planning_method, world_sdf_path, robot_path):
                 x_start=x_s,
                 y_start=y_s,
                 yaw_start=yaw_s,
-                world_map=world_sdf_path,
+                world_map=grid_csv_path,
                 foot_positions_start=p_foot_pos,
             )
         )
@@ -358,6 +359,8 @@ plant.RegisterAsSourceForSceneGraph(scene_graph)
 quad = Parser(plant=plant).AddModelFromFile(robot_urdf, "quad")
 
 grid = createObstacleGrid(terrain)
+# write grid array to a file for towr to consume
+np.savetxt(grid_csv_path, grid.toArray(), fmt='%.4f', delimiter=',')
 world_parser = createWorld(world_sdf_path, grid)
 
 # create path and visualize
@@ -384,7 +387,7 @@ assert plant.geometry_source_is_registered()
 trunk_source_id, trunk_frame_ids = addTrunkGeometry(scene_graph)
 
 # Create high-level trunk-model planner and low-level whole-body controller
-planner = makePlanner(planning_method, world_sdf_path, robot_path)
+planner = makePlanner(planning_method, grid_csv_path, robot_path)
 controller = makeController(control_method, plant, dt)
 
 connectSystems(builder, scene_graph, plant, planner, controller, trunk_source_id)
