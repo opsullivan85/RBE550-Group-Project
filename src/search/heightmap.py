@@ -4,7 +4,10 @@ from functools import cached_property
 from typing import Union
 
 import numpy as np
-import pyglet
+from search import ENABLE_VISUALIZATION
+
+if ENABLE_VISUALIZATION:
+    import pyglet
 import shapely
 
 from control import Control

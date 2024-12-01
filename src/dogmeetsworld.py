@@ -9,7 +9,7 @@ from quadruped_drake.planners import (
     MultiTrunkPlanner,
 )
 import pydot
-from search.search import search
+from search.search import search, simplify_path
 from search.states import Point
 
 import itertools
@@ -330,10 +330,9 @@ def createPath(path_type: PathType):
                 final_state=Point(4, 4),
                 dt=0.1,
             )
-            if not a_star_path.sucess:
-                raise Exception(a_star_path.failure_msg)
+            a_star_path = simplify_path(a_star_path, max_segment_length=4)
             robot_path = np.asarray(
-                [[state.x, state.y, state.theta] for state in a_star_path.result][::20]
+                [(state.x, state.y, state.theta) for state in a_star_path]
             )
             return robot_path
 
