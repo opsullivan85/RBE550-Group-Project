@@ -35,7 +35,7 @@ control_method = "ID"  # ID = Inverse Dynamics (standard QP),
 
 sim_time = 1000.0  # make it long
 dt = 1e-3
-target_realtime_rate = 0.5
+target_realtime_rate = 1.0
 
 show_diagram = False
 make_plots = False
@@ -52,7 +52,7 @@ class PathType(Enum):
     GENERATED=2
 path_type = PathType.MANUAL
 
-avg_trunk_vel = 0.6
+avg_trunk_vel = 1.0
 
 # environment
 terrain = ob.Terrain.ROUGH
@@ -108,7 +108,7 @@ def addGround(plant):
     X_BG.set_translation(
         np.array([0.0, 0.0, -0.005])
     )  # Offset halfspace ground for now
-    surface_friction = CoulombFriction(static_friction=1.0, dynamic_friction=1.0)
+    surface_friction = CoulombFriction(static_friction=0.9, dynamic_friction=0.9)
     plant.RegisterCollisionGeometry(
         plant.world_body(),  # the body for which this object is registered
         X_BG,  # The fixed pose of the geometry frame G in the body frame B
@@ -116,6 +116,7 @@ def addGround(plant):
         "ground_collision",  # A name
         surface_friction,
     )  # Coulomb friction coefficients
+    '''
     plant.RegisterVisualGeometry(
         plant.world_body(),
         X_BG,
@@ -123,7 +124,7 @@ def addGround(plant):
         "ground_visual",
         np.array([0.5, 0.5, 0.5, 0.0]),
     )  # Color set to be completely transparent
-
+'''
 
 def addTrunkGeometry(scene_graph):
     # Add custom visualizations for the trunk model
@@ -302,7 +303,10 @@ def setupVisualization(builder, scene_graph, publish_period=None):
 def createManualPath():
     # manually create a path from start to end
     path = np.array(
-        [start, [1.25, 1.4, 0], [2, 4, 0], goal]
+        [start, 
+         [1.25, 1.4, 0], 
+         [2, 4, 0], 
+         goal]
     )
 
     # fix yaw of each path point

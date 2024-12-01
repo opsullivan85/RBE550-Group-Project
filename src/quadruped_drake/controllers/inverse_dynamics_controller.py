@@ -16,7 +16,7 @@ class IDController(BasicController):
         self.DeclareAbstractInputPort("trunk_input", AbstractValue.Make({}))
 
         # Set the friction coefficient
-        self.mu = 0.7
+        self.mu = 0.9
 
         # Choose a solver
         # self.solver = GurobiSolver()
@@ -264,12 +264,13 @@ class IDController(BasicController):
         # assert result.is_success()
         if result.is_success():
             tau = result.GetSolution(tau)
+            tau_sat = 24
             #Brick-wall saturation for torque limits of MIT Minicheetah actuators
             for i in range(12):
-                if tau[i] > 17:
-                    tau[i] = 17
-                elif tau[i] < -17:
-                    tau[i] = -17
+                if tau[i] > tau_sat:
+                    tau[i] = tau_sat
+                elif tau[i] < -tau_sat:
+                    tau[i] = -tau_sat
         else:
             # The dog has failed and thus we Old Yeller it
             tau = np.zeros(12)        
@@ -288,4 +289,7 @@ class IDController(BasicController):
         self.err = x_tilde.T @ x_tilde
         self.res = result.get_solver_details().primal_res
 
+        if np.linalg.norm(rpy_body - rpy_body_nom) > 0.5:
+            tau = np.zeros(12)     
+        
         return tau
