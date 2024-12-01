@@ -37,6 +37,7 @@ def simplify_path(
     states: list[HoloQuadState],
     max_segment_length: Optional[float] = None,
     tolerance: float = 0.5,
+    turning_weight: float = 1.0,
 ) -> list[Position]:
     """
     Simplifies a set of states
@@ -46,6 +47,8 @@ def simplify_path(
         max_segment_length (float): Maximum length of a segment, see shapely.LineString.segmentize for specifics.
             This may or may not actually correspond to the euclidiean length of each segment.
         tolerance (float, optional): The tolerance for simplifying, see shapely.simplify for specifics. Defaults to 0.5.
+        turning_weight (float, optional): Added weight to turning, changes how strictly the simplification
+            respects changes in angle. Defaults to 1.
 
     Returns:
         list[HoloQuadState]: The simplified path
@@ -53,7 +56,7 @@ def simplify_path(
     # here we are treating theta as another linear dimension.
     # this is a little funny, but should avoid simplifying out
     # rapid turns
-    positions = [(state.x, state.y, state.theta) for state in states]
+    positions = [(state.x, state.y, state.theta * turning_weight) for state in states]
     line = shapely.LineString(positions)
     simple_line = shapely.simplify(line, tolerance, preserve_topology=True)
 
@@ -64,9 +67,14 @@ def simplify_path(
         coordinates = np.asarray(simple_line.coords)
         coordinates[:, 2] = _interpolate_nan(coordinates[:, 2])
 
-        simple_positions = [Position(*row) for row in coordinates]
+        simple_positions = [
+            Position(row[0], row[1], row[2] / turning_weight) for row in coordinates
+        ]
     else:
-        simple_positions = [Position(*position) for position in simple_line.coords]
+        simple_positions = [
+            Position(position[0], position[1], position[2] / turning_weight)
+            for position in simple_line.coords
+        ]
 
     return simple_positions
 
@@ -102,6 +110,9 @@ def search(
         list[HoloQuadState]: a list of states leading to the solution (assuming sucess)
     """
     map[map > 0.5] = np.inf
+    # Somewhere in this pipeline (or on the other side) X and Y are getting swapped.
+    # this should fix it
+    map = map.T
     state_space_bin_sizes = {
         "x_velocity": 0.4,
         "y_velocity": 0.4,
@@ -339,9 +350,11 @@ if __name__ == "__main__":
             # try again, map was generated invalid
             ...
 
-    heightmap = HeightMap.default_from_heightmap(height_map=map, scale=0.17)
+    heightmap = HeightMap.default_from_heightmap(height_map=map.T, scale=0.17)
 
-    simple_states = simplify_path(states, max_segment_length=0.8, tolerance=0.17)
+    simple_states = simplify_path(
+        states, max_segment_length=0.8, tolerance=0.17, turning_weight=0.25
+    )
     print(f"{len(states) = }")
     print(f"{len(simple_states) = }")
 

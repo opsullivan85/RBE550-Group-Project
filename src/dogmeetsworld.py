@@ -338,8 +338,13 @@ def createPath(path_type: PathType):
                 final_state=Point(4, 4),
                 dt=0.5,
             )
+            tolerance = 0.17  # roughly how long to go between waypoints (m)
             a_star_path = simplify_path(
-                a_star_path, max_segment_length=0.8, tolerance=0.17
+                a_star_path,
+                max_segment_length=0.8,
+                tolerance=0.17,
+                # roughly means: add an extra waypoint for turning in place 45deg
+                turning_weight=tolerance / (np.pi / 4),
             )
             robot_path = np.asarray(
                 [(state.x, state.y, state.theta) for state in a_star_path]
