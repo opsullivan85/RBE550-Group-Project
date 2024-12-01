@@ -246,7 +246,7 @@ class HoloQuad(SimAgent):
                 lazy_turning * 0,
                 lazy_acceleration * 0,
                 straight_motion * 0.5,
-                height * 10,
+                height * 6,
             )
         )
 
