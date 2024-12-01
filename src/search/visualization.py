@@ -126,15 +126,14 @@ if ENABLE_VISUALIZATION:
             display_server.display(frame, clear_before=clear_between)
             time.sleep(frame_time)
 
-
-def view_collision_geometry(frame: list[SimObject], show=True, camera=Camera()):
-    for agent in frame:
-        for agent_part in agent.collision_polygons:
-            plt.plot(*agent_part.exterior.xy)
-    plt.xlim(camera.x, camera.x + window_dims[0] / camera.zoom)
-    plt.ylim(camera.y, camera.y + window_dims[1] / camera.zoom)
-    if show:
-        plt.show()
+    def view_collision_geometry(frame: list[SimObject], show=True, camera=Camera()):
+        for agent in frame:
+            for agent_part in agent.collision_polygons:
+                plt.plot(*agent_part.exterior.xy)
+        plt.xlim(camera.x, camera.x + window_dims[0] / camera.zoom)
+        plt.ylim(camera.y, camera.y + window_dims[1] / camera.zoom)
+        if show:
+            plt.show()
 
 
 if ENABLE_VISUALIZATION:

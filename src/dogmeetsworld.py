@@ -9,7 +9,7 @@ from quadruped_drake.planners import (
     MultiTrunkPlanner,
 )
 import pydot
-from search.search import search
+from search.search import search, simplify_path
 from search.states import Point
 
 import itertools
@@ -47,10 +47,13 @@ pitch_init = 0.0
 world_sdf_path: str = "/home/ws/src/world.sdf"
 grid_csv_path: str = "/home/ws/src/grid.csv"
 
+
 class PathType(Enum):
-    MANUAL=1
-    GENERATED=2
-path_type = PathType.MANUAL
+    MANUAL = 1
+    GENERATED = 2
+
+
+path_type = PathType.GENERATED
 
 avg_trunk_vel = 1.0
 
@@ -76,10 +79,10 @@ def createObstacleGrid(terrain):
     grid.insertFreeZone(pos_x=start[0], pos_y=start[1], radius=r)
     grid.insertFreeZone(pos_x=goal[0], pos_y=goal[1], radius=r)
 
-    density=simple_obs_density
+    density = simple_obs_density
     if terrain == ob.Terrain.ROUGH:
         density = rough_obs_density
-    
+
     ob.fillObstacles(grid, density=density, terrain=terrain)
     return grid
 
@@ -93,12 +96,20 @@ def createWorld(world_sdf_path, grid):
     parser.AddModels(file_contents=world_sdf, file_type="sdf")
 
     # create border visualization
-    border = np.array( [[0,0,-math.pi/4], [0, env_size_y, math.pi/4],
-                        [env_size_x, env_size_y, -math.pi/4], [env_size_x, 0, math.pi/4], [0, 0,
-                                                                                           -math.pi/4]] )
-    border_sdf = path_vis.PathVisualizer("border", border, pretty=False, height=0).toSdf()    
+    border = np.array(
+        [
+            [0, 0, -math.pi / 4],
+            [0, env_size_y, math.pi / 4],
+            [env_size_x, env_size_y, -math.pi / 4],
+            [env_size_x, 0, math.pi / 4],
+            [0, 0, -math.pi / 4],
+        ]
+    )
+    border_sdf = path_vis.PathVisualizer(
+        "border", border, pretty=False, height=0
+    ).toSdf()
     parser.AddModelsFromString(file_contents=border_sdf, file_type="sdf")
-    
+
     return parser
 
 
@@ -299,7 +310,7 @@ def setupVisualization(builder, scene_graph, publish_period=None):
     # Add the visualizer to the builder
     MeshcatVisualizer.AddToBuilder(builder, scene_graph, meshcat, meshcat_params)
 
-    
+
 def createManualPath():
     # manually create a path from start to end
     path = np.array(
@@ -320,28 +331,33 @@ def createManualPath():
 
 
 def createPath(path_type: PathType):
-    """ Either provide a manually created or search-based generated path.
-    """
+    """Either provide a manually created or search-based generated path."""
     match path_type:
         case PathType.MANUAL:
             return createManualPath()
-        
+
         case PathType.GENERATED:
             a_star_path = search(
                 map=grid.toArray(),
                 map_cell_size=res_m_p_cell,
                 initial_state=Point(0, 0),
                 final_state=Point(4, 4),
-                dt=0.1,
+                dt=0.5,
             )
-            if not a_star_path.sucess:
-                raise Exception(a_star_path.failure_msg)
+            tolerance = 0.17  # roughly how long to go between waypoints (m)
+            a_star_path = simplify_path(
+                a_star_path,
+                max_segment_length=0.8,
+                tolerance=0.17,
+                # roughly means: add an extra waypoint for turning in place 45deg
+                turning_weight=tolerance / (np.pi / 4),
+            )
             robot_path = np.asarray(
-                [[state.x, state.y, state.theta] for state in a_star_path.result][::20]
+                [(state.x, state.y, state.theta) for state in a_star_path]
             )
             return robot_path
 
-        
+
 quadruped_drake_path = str(Path(quadruped_drake.__file__).parent)
 
 
@@ -364,7 +380,7 @@ quad = Parser(plant=plant).AddModelFromFile(robot_urdf, "quad")
 
 grid = createObstacleGrid(terrain)
 # write grid array to a file for towr to consume
-np.savetxt(grid_csv_path, grid.toArray(), fmt='%.4f', delimiter=',')
+np.savetxt(grid_csv_path, grid.toArray(), fmt="%.4f", delimiter=",")
 world_parser = createWorld(world_sdf_path, grid)
 
 # create path and visualize

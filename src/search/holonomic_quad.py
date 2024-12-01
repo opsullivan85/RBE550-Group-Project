@@ -176,12 +176,20 @@ class HoloQuad(SimAgent):
             len(height_maps) == 1
         ), "Exactly one heightmap should be contained in `others`"
         height_map = height_maps[0]
+
         try:
-            gs = height_map.to_grid_space_safe(self.state)
+            self_gs = height_map.to_grid_space_safe(self.state)
+            # this probably shouldn't ever throw an error, and could
+            # cause odd cascading errors if it does, but we'll just
+            # hope that doesn't happen
+            prev_gs = height_map.to_grid_space_safe(prev_agent.state)
         except IndexError as e:
             # infinite cost for being out of bounds
             return np.inf
-        height = height_map.state.heights[gs[0], gs[1]]
+
+        self_height = height_map.state.heights[self_gs[0], self_gs[1]]
+        prev_height = height_map.state.heights[prev_gs[0], prev_gs[1]]
+        height = np.abs(self_height - prev_height)
 
         # Heuristic is primarily distance
         agent_pos = np.asarray([self.state.x, self.state.y])
@@ -215,7 +223,7 @@ class HoloQuad(SimAgent):
         ) / (distance + 0.5)
 
         # discourage turning
-        lazy_turning = self._previous_control.angular_acceleration
+        lazy_turning = np.abs(self._previous_control.angular_acceleration)
 
         # discourage changing acceleration
         lazy_acceleration = np.hypot(
@@ -237,8 +245,8 @@ class HoloQuad(SimAgent):
                 search_depth * 0.002,
                 lazy_turning * 0,
                 lazy_acceleration * 0,
-                straight_motion * 0.1,
-                height * 10,
+                straight_motion * 0.5,
+                height * 6,
             )
         )
 

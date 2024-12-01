@@ -4,7 +4,10 @@ from functools import cached_property
 from typing import Union
 
 import numpy as np
-import pyglet
+from search import ENABLE_VISUALIZATION
+
+if ENABLE_VISUALIZATION:
+    import pyglet
 import shapely
 
 from control import Control
@@ -14,7 +17,7 @@ from util import transform_2d
 
 
 def height_to_color(map: "HeightMap", height: float) -> tuple[int, int, int]:
-    val = 255 - int(((np.atan(height * 10) + np.pi / 2) / np.pi) * 255)
+    val = 255 - int(((np.arctan(height * 10) + np.pi / 2) / np.pi) * 255)
     return (val, val, val)
 
 
