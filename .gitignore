@@ -7,3 +7,4 @@ build
 diagram.svg
 *.png
 grid.csv
+src/quadruped_drake/CMakeUserPresets.json
