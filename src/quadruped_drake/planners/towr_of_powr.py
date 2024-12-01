@@ -41,7 +41,7 @@ class MultiTrunkPlanner(BasicTrunkPlanner):
                                    foot_positions=foot_positions_start)
 
         # Time to wait in a standing position before starting the motion
-        self.wait_time = 2.5
+        self.wait_time = 3.0
         self.init_footpos = foot_positions_start
         self.worldmap = world_map
         self.waypoints = waypoints
@@ -61,7 +61,7 @@ class MultiTrunkPlanner(BasicTrunkPlanner):
 
         # Call TOWR repeatedly to generate a nominal trunk trajectory
         self.multijectory(waypoints=waypoints, avg_trunk_vel=avg_trunk_vel)
-        print("Hooo-yah!")
+        print("Full multi-trajectory plan complete!")
 
 
     def lcm_handler(self, channel, data):
