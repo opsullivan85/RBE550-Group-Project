@@ -44,7 +44,6 @@ z_init = 0.3
 roll_init = 0.0
 pitch_init = 0.0
 
-world_sdf_path: str = "/home/ws/src/world.sdf"
 grid_csv_path: str = "/home/ws/src/grid.csv"
 
 
@@ -66,7 +65,7 @@ rough_obs_density = 0.8
 res_m_p_cell = 0.17
 
 # start and goal
-start = np.array([0, 0, 45 / 180 * math.pi])  # x, y, yaw
+start = np.array([0.1, 0.1, 45 / 180 * math.pi])  # x, y, yaw
 goal = np.array([env_size_x, env_size_y, 45 / 180 * math.pi])
 
 #####################################################
@@ -87,11 +86,8 @@ def createObstacleGrid(terrain):
     return grid
 
 
-def createWorld(world_sdf_path, grid):
+def createWorld(grid):
     world_sdf = ob.gridToSdf(grid)
-    with open(world_sdf_path, "w") as f:
-        f.write(world_sdf)
-
     parser = Parser(plant, scene_graph, "world")
     parser.AddModels(file_contents=world_sdf, file_type="sdf")
 
@@ -133,7 +129,7 @@ def addGround(plant):
         X_BG,
         HalfSpace(),
         "ground_visual",
-        np.array([0.5, 0.5, 0.5, 0.0]),
+        np.array([res_m_p_cell, res_m_p_cell, res_m_p_cell, 0.0]),
     )  # Color set to be completely transparent
 '''
 
@@ -381,7 +377,7 @@ quad = Parser(plant=plant).AddModelFromFile(robot_urdf, "quad")
 grid = createObstacleGrid(terrain)
 # write grid array to a file for towr to consume
 np.savetxt(grid_csv_path, grid.toArray(), fmt="%.4f", delimiter=",")
-world_parser = createWorld(world_sdf_path, grid)
+world_parser = createWorld(grid)
 
 # create path and visualize
 robot_path = createPath(path_type)
@@ -395,10 +391,6 @@ world_parser.AddModelsFromString(file_contents=robot_path_sdf, file_type="sdf")
 
 
 addGround(plant)
-
-# Turn off gravity
-# g = plant.mutable_gravity_field()
-# g.set_gravity_vector([0,0,0])
 
 plant.Finalize()
 assert plant.geometry_source_is_registered()
