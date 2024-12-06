@@ -1,3 +1,5 @@
+# Example of generating a random environment.
+
 from pydrake.common import temp_directory
 from pydrake.geometry import StartMeshcat
 from pydrake.math import RigidTransform, RollPitchYaw
