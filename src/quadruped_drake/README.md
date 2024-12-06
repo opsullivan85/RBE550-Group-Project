@@ -1,6 +1,6 @@
 # Quadruped Drake
 
-This repository contains code for the simulation and control of quadruped robots using [Drake](https://drake.mit.edu).
+This repository contains code for the simulation and control of quadruped robots using [Drake](https://drake.mit.edu). This code has been modified and extended for the use in this RBE 550 Project.
 
 ![](demo.gif)
 
@@ -41,5 +41,3 @@ Compile C\+\+ code (includes TOWR and custom LCM bindings for interface with dra
 ```
 make
 ```
-
-## Usage
