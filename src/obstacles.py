@@ -9,6 +9,8 @@ from dataclasses import dataclass
 
 @dataclass
 class Obstacle:
+    """ Represents an obstacle in the grid environment.
+    """
     # size in number of grid cells
     size_x_cell: int
     size_y_cell: int
@@ -55,11 +57,15 @@ class Obstacle:
 
     
 class Step(Obstacle):
+    """ Fixed height step obstacle.
+    """
     def __init__(self, pos_x_cell=0, pos_y_cell=0):
         super().__init__(size_x_cell=2, size_y_cell=2, size_z = 0.10, pos_x_cell=pos_x_cell, pos_y_cell=pos_y_cell)
 
 
 class VariableHeightStep(Obstacle):
+    """ Variable height step obstacle. Update the height after construction.
+    """
     def __init__(self, pos_x_cell=0, pos_y_cell=0):
         super().__init__(size_x_cell=2, size_y_cell=2, size_z = 0.10, pos_x_cell=pos_x_cell, pos_y_cell=pos_y_cell)
 
@@ -68,11 +74,15 @@ class VariableHeightStep(Obstacle):
         
     
 class Column(Obstacle):
+    """ Column or pillar obstacle """
     def __init__(self, pos_x_cell=0, pos_y_cell=0):
         super().__init__(size_x_cell=4, size_y_cell=4, size_z=0.75, pos_x_cell=pos_x_cell, pos_y_cell=pos_y_cell)
     
 
 class Grid:
+    """ The grid cell environment. Contains a 2D grid cell array and obstacles
+    that cover specific cells.  """
+
     def __init__(self, size_x, size_y, res_m_p_cell):
         self._size_x_cell = round(size_x / res_m_p_cell)
         self._size_y_cell = round(size_y / res_m_p_cell)

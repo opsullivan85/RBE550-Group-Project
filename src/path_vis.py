@@ -6,6 +6,9 @@ from enum import Enum
 
 
 class PathVisualizer:
+    """ Used to visualize a global, multi-segment path of the robot.
+    """
+    
     _black ="""
             <material>
               <ambient>0 0 0 1</ambient>
@@ -42,12 +45,12 @@ class PathVisualizer:
         links_sdf = ""
         i = 0
         for start, end in itertools.pairwise(self._path):
-            links_sdf += self.pathSegToSdf(start, end, i)
+            links_sdf += self._pathSegToSdf(start, end, i)
             i += 1
 
         # add sphere for last point
         if self._pretty:
-            links_sdf += self.pathPointToSdf(self._path[-1], link_id=i)
+            links_sdf += self._pathPointToSdf(self._path[-1], link_id=i)
         
         sdf = f"""<?xml version="1.0" ?>
         <sdf version="1.4">
@@ -58,7 +61,7 @@ class PathVisualizer:
         """
         return sdf
 
-    def pathPointToSdf(self, pt: np.ndarray, **kwargs):
+    def _pathPointToSdf(self, pt: np.ndarray, **kwargs):
         # create a cylinder at the point
 
         if pt.size == 2:
@@ -98,7 +101,7 @@ class PathVisualizer:
             """
         return waypoint_vis
     
-    def pathLineToSdf(self, start: np.ndarray, end: np.ndarray, **kwargs):
+    def _pathLineToSdf(self, start: np.ndarray, end: np.ndarray, **kwargs):
         # create a cyclinder that goes from the start point to the end point
         
         link_id = kwargs.get('link_id', None)
@@ -142,15 +145,15 @@ class PathVisualizer:
         return line_vis
         
 
-    def pathSegToSdf(self, start: np.ndarray, end: np.ndarray, id_str: int):
+    def _pathSegToSdf(self, start: np.ndarray, end: np.ndarray, id_str: int):
         # Create an SDF string of a two point path segment. A sphere is created
         # for the start point, and a cyclinder goes from the start to the end.
 
         # create line visualization strings
         waypoint_vis = ""
         if self._pretty:
-            waypoint_vis = self.pathPointToSdf(start)
-        line_vis = self.pathLineToSdf(start, end, link_id=id_str)
+            waypoint_vis = self._pathPointToSdf(start)
+        line_vis = self._pathLineToSdf(start, end, link_id=id_str)
 
         link_name = f"link_{id_str}"
         link_sdf = f"""

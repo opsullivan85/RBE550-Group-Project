@@ -10,8 +10,8 @@ import itertools
 
 class MultiTrunkPlanner(BasicTrunkPlanner):
     """
-    Trunk planner which uses TOWR (https://github.com/ethz-adrl/towr/) to generate
-    target motions of the base and feet.
+    This extends the functionality of TowrTrunkPlanner to take a
+    multi-segment path as input and send the end-points of each segment to TOWR.
     """
 
     def __init__(
