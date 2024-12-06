@@ -1,5 +1,21 @@
 # README
 
+## Code Organization
+- `.devcontainer`: Docker related files.
+- `src`: All the source code.
+  - `dogmeetsworld.py`: The main script for running an end-to-end motion
+    planning test in an environment.
+  - `obstacles.py`: Contains classes and functions for generating an obstacle environment.
+  - `path_vis.py`: Contains the `PathVisualizer` class PathVisualizer used to
+    visualize a global, multi-segment path of the robot.
+  - `search/`: Global path planning code for the quadruped trunk.
+  - `example-*`: Example code of specific components, mainly for sub-system testing purposes.
+  - `quadruped_drake/`: The main reference code used, which includes TOWR. The
+    only modifications made to this reference code base are listed below.
+    - `planners/towr_of_powr.py`: Mid-level trunk planner used to loop through
+      the segments of the global path and start/end states to TOWR. This extends
+      the originally existing functionality of the `TowrTrunkPlanner` class.
+
 ## Running our project
 
 ### Startup Docker Container
@@ -91,14 +107,3 @@ initially collapse due to torque limits, followed by a visualization of the
 planned trunk as a transparent black box, and foot placements as black balls.
 
 Other python scripts in this directory can be run in a similar way.
-
-## Code Organization
-- `.devcontainer`: Docker related files.
-- `src`: All the source code.
-  - `search/`: Global path planning code for the quadruped trunk.
-  - `example-*`: Example code of specific components, mainly for sub-system testing purposes.
-  - `quadruped_drake/`: The main reference code used, which includes TOWR. The
-    only modifications made to this reference code base are listed below.
-    - `planners/towr_of_powr.py`: Mid-level trunk planner used to loop through
-      the segments of the global path and start/end states to TOWR. This extends
-      the originally existing functionality of the `TowrTrunkPlanner` class.

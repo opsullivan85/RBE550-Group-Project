@@ -206,9 +206,11 @@ class Terrain(Enum):
 
 
 def fillObstacles(grid, density, terrain = Terrain.SIMPLE):
-    """
-    Fill a grid with randomly selected obstacles at random locations until the
-    obstacle density is reached. The density is a value between 0.0 and 1.0.
+    """Fill a grid with randomly selected obstacles at random locations until
+    the obstacle density is reached. The density is a value between 0.0 and
+    1.0. The set of obstacles used and their probability distribution are based
+    on the provided terrain type.
+
     """
     # seed random number generation so that environments are consistent for
     # particular densities
