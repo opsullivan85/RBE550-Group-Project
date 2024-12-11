@@ -6,6 +6,10 @@
 #include <Eigen/Dense>
 #include <rapidcsv.h>
 
+/*
+ * Implements the height map interface by using a 2D grid read from a CSV file,
+ * with each element representing the environment height value.
+ */
 class Grid final : public towr::HeightMap
 {
 public:
@@ -15,17 +19,13 @@ public:
         rapidcsv::Document doc(file_path, rapidcsv::LabelParams(-1,-1));
         grid_ = Eigen::MatrixXd::Zero(doc.GetRowCount(), doc.GetColumnCount());
         for (size_t i{}; i<doc.GetRowCount(); ++i){
-            //const auto row = doc.GetRow<double>(i);
-            //std::cout << "row " << i << std::endl;
             for (size_t j{}; j<doc.GetColumnCount(); ++j){
-                //grid_(i, j) = row.at(j);
-                // std::cout << "col " << j << std::endl;
-                // std::cout << "cell value: " << doc.GetCell<std::string>(j, i);
                 grid_(i, j) = doc.GetCell<double>(j, i);
             }
         }
     };
 
+    // Return the terrain height at a particular location.
     double GetHeight(double x, double y) const override
     {
         const size_t x_cell = static_cast<size_t>(x/res_m_p_cell_);
@@ -36,6 +36,7 @@ public:
         return grid_(y_cell, x_cell);
     };
 
+    // Return the approximate slope in the x direction at a particular location.
     double GetHeightDerivWrtX(double x, double y) const override
     {
         const size_t x_cell = static_cast<size_t>(x/res_m_p_cell_);
@@ -72,6 +73,7 @@ public:
         return 0.0;
     }
 
+    // Return the approximate slope in the y direction at a particular location.
     double GetHeightDerivWrtY(double x, double y) const override
     {
         const size_t x_cell = static_cast<size_t>(x/res_m_p_cell_);

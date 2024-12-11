@@ -15,6 +15,8 @@
     - `planners/towr_of_powr.py`: Mid-level trunk planner used to loop through
       the segments of the global path and start/end states to TOWR. This extends
       the originally existing functionality of the `TowrTrunkPlanner` class.
+    - `towr/include/towr/terrain/Grid.h`: Contains the Grid class used to
+      calculate terrain height and derivative values.
 
 ## Running our project
 
