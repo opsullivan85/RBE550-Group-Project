@@ -51,7 +51,7 @@ docker compose stop
 
 All other instructions are assumed to be in the docker container with, unless otherwise stated.
 
-# Build TOWR
+### Build TOWR
 Move into the `quadruped_drake` directory from the `ws` directory.
 
 ``` shell
@@ -82,7 +82,7 @@ Compile C\+\+ code (includes TOWR and custom LCM bindings for interface with dra
 make
 ```
 
-# Run the main Python Script
+### Run the main Python Script
 In any webbrowser open the address `localhost:7000`. Nothing will appear yet,
 but it will be used for environment visualization so be ready to refresh it.
 
